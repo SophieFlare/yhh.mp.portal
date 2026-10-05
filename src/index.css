@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+.mp-grid {
+  background-image:
+    linear-gradient(#34d39922 1px, transparent 1px),
+    linear-gradient(90deg, #34d39922 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.mp-panel {
+  animation: mp-enter 280ms ease-out both;
+}
+
+@keyframes mp-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-panel {
+    animation: none;
+  }
+
+  .mp-terminal button {
+    transition: none;
+  }
+}
+
+.assessment-glow {
+  animation: assessment-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes assessment-pulse {
+  0%, 100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assessment-glow {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+
+.hero-cursor {
+  animation: hero-cursor-blink 0.8s step-end infinite;
+}
+
+@keyframes hero-cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cursor {
+    animation: none;
+    display: none;
+  }
+}
