@@ -23,6 +23,14 @@ const content = {
     footer: "იდეები. ტექნოლოგია. თანამშრომლობა.",
     links: [
       {
+        to: "/",
+        label: "მთავარი",
+        title: "მთავარი გვერდი",
+        description:
+          "დაბრუნდი დასაწყისში და აირჩიე შენი შემდეგი ნაბიჯი.",
+        tag: "HOME",
+      },
+      {
         to: "/about",
         label: "YHH",
         title: "კომპანიის შესახებ",
@@ -81,6 +89,14 @@ const content = {
     preview: "DESTINATION PREVIEW",
     footer: "Ideas. Technology. Collaboration.",
     links: [
+      {
+        to: "/",
+        label: "Home",
+        title: "Back to the beginning",
+        description:
+          "Return to the home page and choose your next step.",
+        tag: "HOME",
+      },
       {
         to: "/about",
         label: "YHH",
@@ -195,10 +211,11 @@ function DirectionGraphic({ number }) {
       </svg>
 
       <div className="relative text-center">
-        <span className="block font-mono text-[9px] tracking-[0.3em] text-zinc-600">
+        <span className="block font-mono text-[10px] tracking-[0.3em] text-zinc-500">
           ROUTE
         </span>
-        <span className="mt-1 block font-mono text-5xl font-light tracking-tighter text-white">
+
+        <span className="mt-1 block font-mono text-5xl font-light tracking-tighter">
           {number}
         </span>
       </div>
@@ -209,19 +226,30 @@ function DirectionGraphic({ number }) {
 export default function NavbarPage({ onClose }) {
   const { language } = useLanguage();
   const { pathname } = useLocation();
+  const [previewPath, setPreviewPath] = useState(null);
 
   const locale = language === "en" ? "en" : "ka";
   const t = content[locale];
 
-  const [previewPath, setPreviewPath] = useState(null);
+  const activeIndex = t.links.findIndex(
+    (item) => item.to === pathname
+  );
 
-  const activeIndex = t.links.findIndex((item) => item.to === pathname);
-  const previewIndex = t.links.findIndex((item) => item.to === previewPath);
+  const previewIndex = t.links.findIndex(
+    (item) => item.to === previewPath
+  );
+
   const selectedIndex =
-    previewIndex >= 0 ? previewIndex : activeIndex >= 0 ? activeIndex : 0;
+    previewIndex >= 0
+      ? previewIndex
+      : activeIndex >= 0
+        ? activeIndex
+        : 0;
 
   const selected = t.links[selectedIndex];
-  const number = String(selectedIndex + 1).padStart(2, "0");
+
+  // Home = 00, YHH = 01, MP = 02...
+  const number = String(selectedIndex).padStart(2, "0");
 
   return (
     <div
@@ -232,8 +260,14 @@ export default function NavbarPage({ onClose }) {
 
       <style>{`
         @keyframes np-enter {
-          from { opacity: 0; transform: translateY(18px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         @keyframes np-orbit {
@@ -249,6 +283,15 @@ export default function NavbarPage({ onClose }) {
         @keyframes np-binary {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
+        }
+
+        @keyframes np-shine {
+          0%, 65% {
+            transform: translateX(-180%) skewX(-20deg);
+          }
+          100% {
+            transform: translateX(350%) skewX(-20deg);
+          }
         }
 
         .np-enter {
@@ -277,39 +320,51 @@ export default function NavbarPage({ onClose }) {
           animation: np-binary 55s linear infinite;
         }
 
+        .np-shine {
+          animation: np-shine 5s ease-in-out infinite;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .np-enter,
           .np-orbit,
           .np-orbit-reverse,
           .np-halo,
-          .np-binary {
+          .np-binary,
+          .np-shine {
             animation: none;
           }
         }
       `}</style>
 
-      {/* Top edge light */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"
       />
 
-      {/* Menu header */}
-      <div className="relative shrink-0 border-b border-white/10 px-5 sm:px-10 lg:px-16">
-        <div className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-3 py-3">
+      {/* Full-width header */}
+      <div className="relative shrink-0 border-b border-white/10 px-4 sm:px-6 lg:px-8">
+        <div className="flex min-h-20 w-full items-center justify-between gap-3 py-3">
           <Link
             to="/"
             onClick={onClose}
             aria-label={t.home}
-            className="rounded-sm font-mono text-lg font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            className="inline-flex shrink-0 items-center gap-2 rounded-sm font-mono focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
-            <span className="mr-2 text-zinc-600">{">_"}</span>
-            $0p̄<span className="text-zinc-400">Xt3c̄h</span>
+            <span
+              aria-hidden="true"
+              className="text-xs text-zinc-500"
+            >
+              {">_"}
+            </span>
+
+            <span className="text-lg font-semibold tracking-tight sm:text-2xl">
+              Sopx<span className="text-zinc-400">tech</span>
+            </span>
           </Link>
 
-          <div className="flex items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <div className="flex items-center gap-3">
-              <span className="hidden text-[8px] text-zinc-600 sm:block">
+              <span className="hidden font-mono text-[9px] tracking-widest text-zinc-500 sm:block">
                 {t.language}
               </span>
 
@@ -323,8 +378,13 @@ export default function NavbarPage({ onClose }) {
               autoFocus
               onClick={onClose}
               aria-label={t.close}
-              className="group flex h-11 w-11 items-center justify-center rounded-md border border-white/15 bg-white/[0.025] text-zinc-300 transition-colors hover:border-white/40 hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none"
+              className="group relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/25 bg-gradient-to-br from-white/15 via-white/5 to-transparent text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-xl transition duration-300 hover:border-white/60 hover:shadow-[0_0_24px_rgba(255,255,255,0.15)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none"
             >
+              <span
+                aria-hidden="true"
+                className="np-shine pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+              />
+
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
@@ -332,7 +392,7 @@ export default function NavbarPage({ onClose }) {
                 stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                className="h-5 w-5"
+                className="relative h-5 w-5 transition-transform duration-300 group-hover:rotate-90 motion-reduce:transition-none"
               >
                 <path d="m6 6 12 12M18 6 6 18" />
               </svg>
@@ -341,19 +401,22 @@ export default function NavbarPage({ onClose }) {
         </div>
       </div>
 
-      {/* Scrollable menu content */}
-      <div className="relative min-h-0 flex-1 overflow-y-auto px-5 py-8 sm:px-10 sm:py-10 lg:px-16">
-        <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_260px] lg:gap-10">
-          {/* Introduction */}
+      {/* Independently scrollable menu */}
+      <div
+        data-lenis-prevent
+        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-8 sm:px-10 sm:py-10 lg:px-16"
+      >
+        <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_260px]">
+          {/* Introduction and brand signature */}
           <div className="np-enter min-w-0">
             <p
               id="navigation-menu-title"
-              className="font-mono text-[9px] tracking-[0.2em] text-zinc-500"
+              className="font-mono text-[10px] tracking-[0.2em] text-zinc-500"
             >
-              {t.navigation} // INDEX_01
+              {t.navigation} // INDEX_00
             </p>
 
-            <p className="mt-8 text-[10px] leading-5 text-zinc-500">
+            <p className="mt-8 text-xs leading-6 text-zinc-400">
               {t.label}
             </p>
 
@@ -364,7 +427,7 @@ export default function NavbarPage({ onClose }) {
               </span>
             </h2>
 
-            <p className="mt-5 max-w-sm text-xs leading-7 text-zinc-500">
+            <p className="mt-5 max-w-sm text-sm leading-7 text-zinc-400">
               {t.description}
             </p>
 
@@ -373,17 +436,33 @@ export default function NavbarPage({ onClose }) {
                 aria-hidden="true"
                 className="h-px w-8 bg-white/40"
               />
-              <span className="font-mono text-[8px] tracking-widest text-zinc-600">
-                YHH × $0p̄Xt3c̄h
+              <span className="font-mono text-[10px] tracking-widest text-zinc-500">
+                YHH × SOPXTECH
               </span>
             </div>
 
             <div className="mt-8 border-t border-white/10 pt-5 grayscale">
               <LTL />
             </div>
+
+            <div
+              aria-hidden="true"
+              className="relative mt-10 overflow-hidden border-t border-white/10 pt-6"
+            >
+              <div className="mb-3 flex items-center justify-between font-mono text-[8px] tracking-[0.2em] text-zinc-500">
+                <span>CREATIVE SYSTEM</span>
+                <span>EST. / SOPX</span>
+              </div>
+
+              <p className="select-none whitespace-nowrap font-mono text-[clamp(2rem,5vw,3.75rem)] font-bold leading-none tracking-tighter text-white/20">
+                Sopxtech<span className="text-white/60">_</span>
+              </p>
+
+              <div className="mt-4 h-px bg-gradient-to-r from-white/40 to-transparent" />
+            </div>
           </div>
 
-          {/* Navigation rows */}
+          {/* Zero-indexed navigation */}
           <nav
             aria-label={t.destinations}
             className="np-enter min-w-0"
@@ -400,17 +479,21 @@ export default function NavbarPage({ onClose }) {
                 onFocus={() => setPreviewPath(item.to)}
                 onBlur={() => setPreviewPath(null)}
                 className={({ isActive }) =>
-                  `group relative flex items-center gap-4 border-b border-white/10 py-5 outline-none transition-colors focus-visible:bg-white/[0.07] focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-white/50 motion-reduce:transition-none ${
+                  `group relative flex items-center gap-4 border-b border-white/10 px-3 py-5 outline-none transition-colors focus-visible:bg-white/[0.07] focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-white/50 motion-reduce:transition-none ${
                     isActive
-                      ? "bg-white/[0.04] text-white"
-                      : "text-zinc-400 hover:bg-white/[0.025] hover:text-white"
+                      ? "bg-white/[0.05] text-white"
+                      : "text-zinc-400 hover:bg-white/[0.035] hover:text-white"
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <span className="w-6 shrink-0 font-mono text-[9px] text-zinc-600">
-                      {String(index + 1).padStart(2, "0")}
+                    <span
+                      className={`w-6 shrink-0 font-mono text-xs ${
+                        isActive ? "text-white" : "text-zinc-500"
+                      }`}
+                    >
+                      {String(index).padStart(2, "0")}
                     </span>
 
                     <div className="min-w-0 flex-1">
@@ -420,20 +503,20 @@ export default function NavbarPage({ onClose }) {
                         </span>
 
                         {isActive && (
-                          <span className="rounded border border-white/15 px-1.5 py-0.5 text-[7px] text-zinc-500">
+                          <span className="rounded border border-white/20 px-2 py-1 text-[8px] text-zinc-400">
                             {t.current}
                           </span>
                         )}
                       </div>
 
-                      <p className="mt-1 text-[10px] leading-5 text-zinc-500">
+                      <p className="mt-1 text-xs leading-5 text-zinc-400">
                         {item.title}
                       </p>
                     </div>
 
                     <span
                       aria-hidden="true"
-                      className="mr-3 text-xl text-zinc-600 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white motion-reduce:transition-none"
+                      className="text-xl text-zinc-500 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white motion-reduce:transition-none"
                     >
                       ↗
                     </span>
@@ -448,19 +531,19 @@ export default function NavbarPage({ onClose }) {
             ))}
           </nav>
 
-          {/* Interactive destination preview */}
+          {/* Destination preview */}
           <aside
-            className="np-enter hidden min-w-0 self-start rounded-xl border border-white/15 bg-black/40 p-4 lg:block"
+            className="np-enter hidden min-w-0 self-start rounded-2xl border border-white/15 bg-gradient-to-br from-white/[0.06] to-black/40 p-4 backdrop-blur-xl lg:block"
             style={{ animationDelay: "180ms" }}
           >
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <p className="font-mono text-[8px] tracking-widest text-zinc-500">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <p className="font-mono text-[9px] tracking-widest text-zinc-400">
                 {t.preview}
               </p>
 
               <span
                 aria-hidden="true"
-                className="h-1 w-1 rounded-full bg-white shadow-[0_0_8px_white]"
+                className="h-1 w-1 shrink-0 rounded-full bg-white shadow-[0_0_8px_white]"
               />
             </div>
 
@@ -470,27 +553,27 @@ export default function NavbarPage({ onClose }) {
               key={selected.to}
               className="np-enter border-t border-white/10 pt-4"
             >
-              <p className="font-mono text-[8px] tracking-[0.15em] text-zinc-600">
+              <p className="font-mono text-[9px] tracking-[0.15em] text-zinc-500">
                 {selected.tag} // {number}
               </p>
 
-              <h3 className="mt-3 text-sm font-semibold leading-6">
+              <h3 className="mt-3 text-base font-semibold leading-6">
                 {selected.title}
               </h3>
 
-              <p className="mt-2 text-[10px] leading-6 text-zinc-500">
+              <p className="mt-2 text-xs leading-6 text-zinc-400">
                 {selected.description}
               </p>
             </div>
 
-            <p className="mt-5 font-mono text-[7px] tracking-widest text-zinc-600">
+            <p className="mt-5 font-mono text-[8px] tracking-widest text-zinc-500">
               {t.selected}
             </p>
           </aside>
         </div>
       </div>
 
-      {/* Footer and binary ticker */}
+      {/* Footer */}
       <footer className="relative shrink-0 overflow-hidden border-t border-white/10 px-5 py-4 sm:px-10 lg:px-16">
         <div
           aria-hidden="true"
@@ -499,20 +582,19 @@ export default function NavbarPage({ onClose }) {
           <div className="np-binary flex w-max whitespace-nowrap font-mono text-[10px] tracking-[0.4em]">
             {[0, 1].map((copy) => (
               <span key={copy} className="shrink-0 pr-16">
+                01010011 01101111 01110000 01111000 01110100
+                01100101 01100011 01101000 / 00110000 00110000 /
                 01011001 01001000 01001000 / 01001101 01010000 /
-                00110000 00110001 / 01000010 01010101 01001001 01001100
-                01000100 / 01011001 01001000 01001000 / 01001101 01010000 /
-                00110000 00110001 /
               </span>
             ))}
           </div>
         </div>
 
-        <div className="relative mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 text-[9px] text-zinc-500">
+        <div className="relative mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 text-[10px] text-zinc-400">
           <p>{t.footer}</p>
 
-          <span className="font-mono text-[8px] tracking-widest text-zinc-600">
-            ESC / EXIT
+          <span className="font-mono text-[9px] tracking-widest text-zinc-500">
+            SOPXTECH / ESC TO EXIT
           </span>
         </div>
       </footer>

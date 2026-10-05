@@ -4,6 +4,96 @@ import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import NavbarPage from "./NavbarPage";
 
+const BRAND = "Sopxtech";
+const SYMBOLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%<>/";
+
+function GlitchBrand() {
+  const [text, setText] = useState(BRAND);
+  const timer = useRef(null);
+  const hovered = useRef(false);
+
+  function scramble(fast = false) {
+    clearInterval(timer.current);
+
+    let frame = 0;
+    const totalFrames = fast ? 15 : 22;
+
+    timer.current = setInterval(() => {
+      frame += 1;
+
+      const revealed = Math.floor(
+        (frame / totalFrames) * BRAND.length
+      );
+
+      setText(
+        [...BRAND]
+          .map((letter, index) => {
+            if (index < revealed) return letter;
+
+            return SYMBOLS[
+              Math.floor(Math.random() * SYMBOLS.length)
+            ];
+          })
+          .join("")
+      );
+
+      if (frame >= totalFrames) {
+        clearInterval(timer.current);
+        setText(BRAND);
+      }
+    }, fast ? 22 : 40);
+  }
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+
+    if (reducedMotion.matches) return;
+
+    const ambientTimer = setInterval(() => {
+      if (!hovered.current) scramble();
+    }, 6000);
+
+    return () => {
+      clearInterval(ambientTimer);
+      clearInterval(timer.current);
+    };
+  }, []);
+
+  function handleHover() {
+    hovered.current = true;
+
+    if (
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      scramble(true);
+    }
+  }
+
+  return (
+    <span
+      aria-hidden="true"
+      onMouseEnter={handleHover}
+      onMouseLeave={() => {
+        hovered.current = false;
+      }}
+      className="relative inline-flex items-center gap-3"
+    >
+      <span className="text-xs text-zinc-500">{">_"}</span>
+
+      <span className="inline-block w-[8ch] whitespace-nowrap text-xl font-semibold tracking-tight sm:text-2xl">
+        {text}
+      </span>
+
+      <span className="hidden items-center gap-2 border-l border-white/15 pl-3 text-[8px] tracking-[0.2em] text-zinc-500 md:inline-flex">
+        <span className="h-1 w-1 rounded-full bg-white/70" />
+        SYSTEM ONLINE
+      </span>
+    </span>
+  );
+}
+
 export default function Navbar() {
   const { language } = useLanguage();
   const { pathname } = useLocation();
@@ -15,7 +105,6 @@ export default function Navbar() {
 
   const isGeorgian = language !== "en";
 
-  // Close when navigation happens outside the menu too.
   useEffect(() => {
     if (previousPath.current !== pathname) {
       setOpen(false);
@@ -23,7 +112,6 @@ export default function Navbar() {
     }
   }, [pathname]);
 
-  // Native modal dialog handles focus trapping and background interaction.
   useEffect(() => {
     if (!open) return;
 
@@ -53,50 +141,77 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50  font-mono text-white ">
+      <style>{`
+        @keyframes sop-menu-shine {
+          0%, 65% {
+            transform: translateX(-180%) skewX(-20deg);
+          }
+          100% {
+            transform: translateX(350%) skewX(-20deg);
+          }
+        }
+
+        .sop-menu-shine {
+          animation: sop-menu-shine 5s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .sop-menu-shine {
+            animation: none;
+          }
+        }
+      `}</style>
+
+      <header className="relative z-50 w-full font-mono text-white">
         <nav
-          aria-label={isGeorgian ? "მთავარი ნავიგაცია" : "Main navigation"}
-          className="px-5 sm:px-10 lg:px-16"
+          aria-label={
+            isGeorgian ? "მთავარი ნავიგაცია" : "Main navigation"
+          }
+          className="w-full px-4 sm:px-6 lg:px-8"
         >
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4">
+          <div className="flex h-20 w-full items-center justify-between gap-4">
             <Link
               to="/"
               aria-label={
-                isGeorgian ? "$0p̄Xt3c̄h — მთავარი" : "$0p̄Xt3c̄h home"
+                isGeorgian
+                  ? "Sopxtech — მთავარი"
+                  : "Sopxtech home"
               }
-              className="inline-flex items-center gap-2 rounded-sm py-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              className="inline-flex rounded-sm py-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
-              <span aria-hidden="true" className="text-xs text-zinc-500">
-                {">_"}
-              </span>
-
-              <span className="text-lg font-semibold tracking-tight">
-                $0p̄<span className="text-zinc-400">Xt3c̄h</span>
-              </span>
+              <GlitchBrand />
             </Link>
 
             <button
               ref={menuButton}
               type="button"
               aria-label={
-                isGeorgian ? "მენიუს გახსნა" : "Open navigation menu"
+                isGeorgian
+                  ? "მენიუს გახსნა"
+                  : "Open navigation menu"
               }
               aria-haspopup="dialog"
               aria-expanded={open}
               aria-controls={open ? "navigation-menu" : undefined}
               onClick={() => setOpen(true)}
-              className="group flex h-11 items-center gap-3 rounded-md border border-white/15 bg-white/[0.025] px-3 text-zinc-300 transition-colors hover:border-white/40 hover:bg-white/[0.06] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none"
+              className="group relative isolate flex h-12 shrink-0 items-center gap-4 overflow-hidden rounded-xl border border-white/25 bg-gradient-to-br from-white/15 via-white/5 to-white/[0.025] px-5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_24px_rgba(0,0,0,0.25)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_0_24px_rgba(255,255,255,0.12)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transform-none motion-reduce:transition-none"
             >
-              <span className="hidden text-[9px] tracking-[0.15em] sm:block">
+              <span
+                aria-hidden="true"
+                className="sop-menu-shine pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              />
+
+              <span className="relative text-[10px] font-semibold tracking-[0.18em]">
                 {isGeorgian ? "მენიუ" : "MENU"}
               </span>
 
               <span
                 aria-hidden="true"
-                className="flex w-5 flex-col items-end gap-1.5"
+                className="relative flex w-5 flex-col items-end gap-1.5"
               >
                 <span className="h-px w-5 bg-current" />
                 <span className="h-px w-3 bg-current transition-[width] duration-300 group-hover:w-5 motion-reduce:transition-none" />
+                <span className="h-px w-4 bg-current transition-[width] duration-300 group-hover:w-5 motion-reduce:transition-none" />
               </span>
             </button>
           </div>
