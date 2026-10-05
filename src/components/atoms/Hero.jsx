@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import WhiteBg from "./WhiteBg";
 import RP from "../sopo/RP";
+import GlitchText from "./GlitchText";
 
 const brand = "$0p̄Xt3c̄h";
 
@@ -293,7 +294,7 @@ export default function Hero() {
         />
 
         {/* Header */}
-        <header className="hero-enter relative shrink-0">
+        <header className="hero-enter relative shrink-0 mt-4">
           <div className="flex items-start gap-3">
             <span
               aria-hidden="true"
@@ -305,15 +306,17 @@ export default function Hero() {
             </p>
           </div>
 
-          <h1 className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono text-[clamp(2.3rem,7vw,6rem)] font-semibold leading-[1.05] tracking-tighter lg:text-[7rem]">
-            <span>YHH</span>
-            <span className="font-light text-zinc-400">×</span>
-            <span>{brand}</span>
-          </h1>
+  <h1 className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono text-[clamp(2.3rem,7vw,6rem)] font-semibold leading-[1.05] tracking-tighter lg:text-[7rem]">
+  <GlitchText text="YHH" />
+
+  <span className="font-light text-zinc-400">×</span>
+
+  <GlitchText text={brand} delay="-1.1s" />
+</h1>
 
           <div
             aria-hidden="true"
-            className="mt-5 flex items-center gap-3"
+            className="mt-2 flex items-center gap-3"
           >
             <span className="h-px w-12 bg-white/60" />
 
@@ -329,7 +332,7 @@ export default function Hero() {
             className="hero-enter min-w-0"
             style={{ animationDelay: "100ms" }}
           >
-            <h2 className="text-3xl font-semibold leading-[1.3] tracking-tight sm:text-4xl 2xl:text-5xl">
+            <h2 className="text-2xl font-semibold leading-[1.3] tracking-tight sm:text-4xl 2xl:text-5xl">
               {t.challenge}
 
               <TypedHeadline
@@ -339,8 +342,7 @@ export default function Hero() {
               />
             </h2>
 
-            <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-300 2xl:text-lg">
-              {t.description}
+         <p className="mt-5 max-w-2xl text-[15px] leading-7 text-zinc-300 2xl:text-base">     {t.description}
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -371,7 +373,7 @@ export default function Hero() {
                   </span>
                 </p>
 
-                <p className="mt-2 text-sm leading-6 text-zinc-400">
+                <p className="mt-2 text-[13px] leading-6 text-zinc-400">
                   {t.awareness}
                 </p>
               </Link>
@@ -400,7 +402,7 @@ export default function Hero() {
         {/* Readable footer and larger action */}
         <footer className="relative flex shrink-0 flex-wrap items-center justify-between gap-5 border-t border-white/20 pt-5">
           <div className="max-w-lg">
-            <p className="text-sm leading-6 text-zinc-300">
+            <p className="text-[13px] leading-6 text-zinc-300">
               {t.process}
             </p>
 

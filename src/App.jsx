@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -10,6 +10,7 @@ import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 
 import { LanguageProvider } from "./context/LanguageContext";
+import LoadingPage from "./components/LoadingPage";
 
 import Home from "./components/Home";
 import Navbar from "./components/atoms/Navbar";
@@ -32,10 +33,8 @@ function AppLayout() {
 
     if (!wrapper || !content) return;
 
-    // Start each page at the top.
     wrapper.scrollTop = 0;
 
-    // Home stays fixed without scrolling.
     if (isHome) return;
 
     const lenis = new Lenis({
@@ -64,7 +63,10 @@ function AppLayout() {
           isHome ? "overflow-hidden" : "overflow-y-auto"
         }`}
       >
-        <div ref={contentRef} className={isHome ? "h-full" : "min-h-full"}>
+        <div
+          ref={contentRef}
+          className={isHome ? "h-full" : "min-h-full"}
+        >
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/levels" element={<Lvl />} />
@@ -89,10 +91,20 @@ function AppLayout() {
 }
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+
+  const finishLoading = useCallback(() => {
+    setLoading(false);
+  }, []);
+
   return (
     <LanguageProvider>
       <BrowserRouter>
-        <AppLayout />
+        {loading ? (
+          <LoadingPage onFinish={finishLoading} />
+        ) : (
+          <AppLayout />
+        )}
       </BrowserRouter>
     </LanguageProvider>
   );
