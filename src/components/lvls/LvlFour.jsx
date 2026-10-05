@@ -2,157 +2,142 @@ import { useLanguage } from "../../context/LanguageContext";
 
 const content = {
   ka: {
-    level: "ეტაპი 04",
-    stage: "ფინალური ეტაპი",
-    title: "შენი უნარები.",
-    subtitle: "ჩვენი შემდეგი მიღწევა_",
-    introduction:
-      "დამტკიცებისა და პირობებზე შეთანხმების შემდეგ კომპანიასთან ერთად შექმნი, გამოცდი და ჩააბარებ რეალურ პროექტს. აქ შენი იდეები მოქმედ ტექნოლოგიად იქცევა.",
+    label: "გასაუბრება და შეთანხმება",
+    title: "განვიხილოთ თანამშრომლობა.",
+    intro:
+      "სატესტო დავალების დამტკიცების შემდეგ გავეცნობით ერთმანეთს, განვიხილავთ პროექტს და შევათანხმებთ სამუშაო პირობებს.",
+    entryLabel: "ეტაპზე გადასვლის პირობა",
+    entry: "Level 02/03-ის წარმატებით შესრულება და კომპანიის თანხმობა.",
     steps: [
       {
-        title: "შექმენი რეალური პროექტი",
+        title: "გასაუბრება",
         description:
-          "დამტკიცებული ტექნიკური დოკუმენტაციის საფუძველზე შექმენი მოქმედი პროექტი.",
+          "განვიხილავთ შენს გამოცდილებას, ტესტის გადაწყვეტას და ტექნიკურ მიდგომას. შეგიძლია დასვა კითხვები პროექტისა და თანამშრომლობის შესახებ.",
       },
       {
-        title: "გამოცადე შენი ნამუშევარი",
+        title: "კონფიდენციალურობის შეთანხმება",
         description:
-          "შეამოწმე ფუნქციონალი, აღწერე შედეგები და განსაზღვრე გაუმჯობესების შესაძლებლობები.",
+          "კონფიდენციალური მასალების გაზიარებამდე გავაფორმებთ საჭირო შეთანხმებას და დავაზუსტებთ ინფორმაციის გამოყენების პირობებს.",
       },
       {
-        title: "დახვეწე და წარადგინე",
+        title: "პროექტის დეტალები და ინსტრუმენტები",
         description:
-          "მოაგვარე აღმოჩენილი პრობლემები და კომპანიას წარუდგინე შენი ნამუშევარი.",
+          "გაგაცნობთ დამტკიცებულ ტექნიკურ მოთხოვნებს და მოგაწვდით საჭირო ინსტრუმენტებს. დავაზუსტებთ კომპონენტების, აღჭურვილობისა და მიწოდების საკითხებს.",
       },
       {
-        title: "ჩააბარე და მიიღე დასტური",
+        title: "სამუშაო პირობები",
         description:
-          "ჩააბარე კოდი, დოკუმენტაცია და შეთანხმებული მასალები საბოლოო მიღებისთვის.",
+          "შევათანხმებთ სამუშაოს მოცულობას, პასუხისმგებლობებს, ხელმისაწვდომობას, ვადებსა და ანაზღაურებას.",
+      },
+      {
+        title: "განვითარების დაწყების შეთანხმება",
+        description:
+          "წერილობით დავაფიქსირებთ ჩასაბარებელ მასალებს, მიღების კრიტერიუმებს, გადახდის პირობებსა და პროგრესის განახლებების ფორმატს.",
       },
     ],
-    scheduleTitle: "მოქნილი სამუშაო გრაფიკი",
-    scheduleDescription:
-      "დაგეგმე სამუშაო საათები შეთანხმებული ვადებისა და გუნდთან კოორდინაციის გათვალისწინებით.",
-    paymentTitle: "ანაზღაურება მიღების შემდეგ",
-    paymentDescription:
-      "ანაზღაურება გაიცემა სამუშაოს წარმატებით დასრულებისა და კომპანიის მიერ მიღების შემდეგ. თანხა, მიღების კრიტერიუმები და გადახდის ვადა სამუშაოს დაწყებამდე წერილობით შეთანხმდება.",
-    partnershipLabel: "ერთად შევქმნათ / ერთად განვვითარდეთ",
-    partnershipTitle: "დეველოპერიდან",
-    partnershipHighlight: "პროექტის პარტნიორამდე.",
-    partnershipDescription:
-      "ითანამშრომლე კომპანიასთან, გაუზიარე შენი გამოცდილება და მონაწილეობა მიიღე პროექტის განვითარებაში. შემდგომი თანამშრომლობა, პასუხისმგებლობები და მომავალი სამუშაოები ერთობლივად შეთანხმდება.",
-    tags: ["თანამშრომლობა", "საერთო მიზნები", "სამომავლო შესაძლებლობები"],
-    footer: "ფინალური ეტაპი.",
-    footerHighlight: "ახალი დასაწყისი.",
+    next: "შემდეგი ნაბიჯი",
+    nextText:
+      "საჭირო შეთანხმებების გაფორმების შემდეგ გადავდივართ Level 04-ზე — პროექტის განვითარებაზე.",
+    confidentiality:
+      "კონფიდენციალური დოკუმენტები გაზიარდება მხოლოდ შესაბამისი შეთანხმების გაფორმების შემდეგ.",
   },
-
   en: {
-    level: "LEVEL 04",
-    stage: "FINAL STAGE",
-    title: "Your skills.",
-    subtitle: "Our next breakthrough_",
-    introduction:
-      "After approval and agreement on the terms, you’ll collaborate with the company to build, test, and deliver the real project. This is where your ideas become working technology.",
+    label: "INTERVIEW AND AGREEMENT",
+    title: "Let’s discuss the collaboration.",
+    intro:
+      "After your technical test is approved, we will meet, discuss the project, and agree on working arrangements.",
+    entryLabel: "ENTRY REQUIREMENT",
+    entry: "Successful completion of Level 02/03 and company approval.",
     steps: [
       {
-        title: "Build the real project",
+        title: "Interview",
         description:
-          "Turn the approved technical dossier into a working project.",
+          "Discuss your experience, test solution, and technical approach. Bring your questions about the project and collaboration.",
       },
       {
-        title: "Test your work",
+        title: "Confidentiality agreement",
         description:
-          "Verify functionality, document results, and identify improvements.",
+          "Complete the required agreement before confidential materials are shared, and clarify how the information may be used.",
       },
       {
-        title: "Refine & demonstrate",
+        title: "Project details and tools",
         description:
-          "Resolve issues and show the company what you have built.",
+          "We will share the approved technical requirements and provide the necessary tools. Component, equipment, and supply arrangements will be clarified.",
       },
       {
-        title: "Deliver & get approval",
+        title: "Working arrangements",
         description:
-          "Submit the code, documentation, and agreed deliverables for acceptance.",
+          "Agree on scope, responsibilities, availability, timeline, and compensation.",
+      },
+      {
+        title: "Agreement to begin development",
+        description:
+          "Record deliverables, acceptance criteria, payment terms, and the progress update format in writing.",
       },
     ],
-    scheduleTitle: "FLEXIBLE SCHEDULE",
-    scheduleDescription:
-      "Organize your working hours while meeting agreed deadlines and coordinating with the team.",
-    paymentTitle: "PAYMENT AFTER ACCEPTANCE",
-    paymentDescription:
-      "Payment follows successful completion and company acceptance. The amount, acceptance criteria, and payment deadline are agreed in writing before work begins.",
-    partnershipLabel: "BUILD TOGETHER / GROW TOGETHER",
-    partnershipTitle: "From developer to",
-    partnershipHighlight: "project partner.",
-    partnershipDescription:
-      "Work closely with the company, contribute your expertise, and help shape the project. Any continuing partnership, responsibilities, and future work will be agreed together.",
-    tags: ["Collaboration", "Shared goals", "Future opportunities"],
-    footer: "Final level.",
-    footerHighlight: "A new beginning.",
+    next: "Next step",
+    nextText:
+      "Once the required agreements are completed, we move to Level 04: project development.",
+    confidentiality:
+      "Confidential documents are shared only after the required agreement is signed.",
   },
 };
 
-export default function LvlFour() {
+export default function LvlThree() {
   const { language } = useLanguage();
   const locale = language === "en" ? "en" : "ka";
   const t = content[locale];
 
   return (
-    <article
-      lang={locale}
-      className="relative isolate overflow-hidden rounded-2xl border border-white/15 bg-black p-6 font-sans text-white sm:p-10"
-    >
-      {/* White accent */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"
-      />
-
-      {/* Soft background light */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-24 -top-24 -z-10 h-64 w-64 rounded-full bg-white/10 blur-[80px]"
-      />
-
+    <article lang={locale} className="min-w-0 font-sans text-white">
       <header className="border-b border-white/10 pb-6">
-        <div className="mb-5 flex flex-wrap items-center gap-3">
-          <span className="rounded-md bg-white px-3 py-1.5 text-xs font-bold text-black">
-            {t.level}
+        <div className="mb-5 flex flex-wrap items-center gap-3 font-mono">
+          <span className="rounded-md border border-white/20 bg-white/5 px-3 py-1.5 text-[10px] tracking-widest text-zinc-300">
+            LEVEL 04
           </span>
 
-          <span className="text-xs font-medium text-zinc-400">
-            {t.stage}
+          <span className="text-[9px] tracking-wide text-zinc-500">
+            {t.label}
           </span>
         </div>
 
-        <h2 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
           {t.title}
-          <br />
-          <span className="text-zinc-400">{t.subtitle}</span>
         </h2>
 
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
-          {t.introduction}
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400">
+          {t.intro}
         </p>
       </header>
 
-      {/* Development sequence */}
-      <ol className="mt-6 space-y-3">
+      <aside className="mt-6 rounded-lg border border-white/20 bg-white/[0.045] p-4 sm:p-5">
+        <p className="flex items-center gap-2 font-mono text-[9px] tracking-wide text-zinc-500">
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-1.5 rounded-full bg-zinc-300"
+          />
+          {t.entryLabel}
+        </p>
+
+        <p className="mt-3 text-sm leading-6 text-zinc-200">
+          {t.entry}
+        </p>
+      </aside>
+
+      <ol className="mt-3 divide-y divide-white/10">
         {t.steps.map(({ title, description }, index) => (
-          <li
-            key={index}
-            className="flex gap-4 rounded-xl border border-white/10 bg-white/[0.025] p-4 sm:p-5"
-          >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white text-sm font-bold text-black shadow-[0_0_18px_rgba(255,255,255,0.08)]">
+          <li key={index} className="flex gap-4 py-5 sm:gap-5">
+            <span
+              aria-hidden="true"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/[0.025] font-mono text-[10px] text-zinc-400"
+            >
               {String(index + 1).padStart(2, "0")}
             </span>
 
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-white sm:text-base">
-                {title}
-              </h3>
+              <h3 className="text-sm font-medium">{title}</h3>
 
-              <p className="mt-2 text-sm leading-7 text-zinc-400">
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-zinc-400">
                 {description}
               </p>
             </div>
@@ -160,80 +145,22 @@ export default function LvlFour() {
         ))}
       </ol>
 
-      {/* Working terms */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <section className="rounded-xl border border-white/10 bg-white/[0.025] p-5">
-          <p className="mb-3 text-lg text-zinc-300" aria-hidden="true">
-            ↗
-          </p>
-
-          <h3 className="text-xs font-bold leading-5 text-white">
-            {t.scheduleTitle}
-          </h3>
-
-          <p className="mt-3 text-sm leading-7 text-zinc-400">
-            {t.scheduleDescription}
-          </p>
-        </section>
-
-        <section className="rounded-xl border border-white/20 bg-white/[0.05] p-5">
-          <p className="mb-3 text-lg text-white" aria-hidden="true">
-            ✓
-          </p>
-
-          <h3 className="text-xs font-bold leading-5 text-white">
-            {t.paymentTitle}
-          </h3>
-
-          <p className="mt-3 text-sm leading-7 text-zinc-300">
-            {t.paymentDescription}
-          </p>
-        </section>
-      </div>
-
-      {/* Partnership */}
-      <section className="relative mt-6 overflow-hidden rounded-xl border border-white/20 bg-gradient-to-br from-white/[0.07] to-transparent p-5 sm:p-6">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent"
-        />
-
-        <p className="text-[10px] font-semibold leading-5 text-zinc-400">
-          {t.partnershipLabel}
-        </p>
-
-        <h3 className="mt-3 text-xl font-bold leading-snug tracking-tight sm:text-2xl">
-          {t.partnershipTitle}{" "}
-          <span className="text-zinc-300">
-            {t.partnershipHighlight}
-          </span>
-        </h3>
-
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400">
-          {t.partnershipDescription}
-        </p>
-
-        <div className="mt-5 flex flex-wrap gap-2">
-          {t.tags.map((item) => (
-            <span
-              key={item}
-              className="rounded-full border border-white/15 bg-black/30 px-3 py-1.5 text-[10px] leading-5 text-zinc-300"
-            >
-              {item}
+      <footer className="mt-4">
+        <div className="rounded-lg border border-white/15 bg-white/[0.035] p-4 sm:p-5">
+          <p className="mb-2 flex items-center gap-2 text-xs font-medium">
+            <span aria-hidden="true" className="text-zinc-500">
+              →
             </span>
-          ))}
+            {t.next}
+          </p>
+
+          <p className="text-xs leading-6 text-zinc-400">
+            {t.nextText}
+          </p>
         </div>
-      </section>
 
-      <footer className="mt-6 flex items-center gap-3 text-xs leading-6 text-zinc-500">
-        <span
-          aria-hidden="true"
-          className="h-2 w-2 shrink-0 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.4)]"
-        />
-
-        <p>
-          {t.footer}{" "}
-          <span className="text-white">{t.footerHighlight}</span>
+        <p className="mt-4 text-xs leading-6 text-zinc-500">
+          {t.confidentiality}
         </p>
       </footer>
     </article>

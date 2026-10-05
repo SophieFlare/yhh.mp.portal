@@ -4,13 +4,15 @@ import LvlOne from "../lvls/LvlOne";
 import LvlTwo from "../lvls/LvlTwo";
 import LvlThree from "../lvls/LvlThree";
 import LvlFour from "../lvls/LvlFour";
+import LvlFive from "../lvls/LvlFive";
 import WhiteBg from "../atoms/WhiteBg";
 
 const levels = [
   { id: "application", component: LvlOne },
   { id: "assessment", component: LvlTwo },
-  { id: "interview", component: LvlThree },
-  { id: "development", component: LvlFour },
+  { id: "overgaang-challenge", component: LvlThree },
+  { id: "interview", component: LvlFour },
+  { id: "development", component: LvlFive },
 ];
 
 const content = {
@@ -21,18 +23,21 @@ const content = {
       "გაეცანი თითოეული ეტაპის მოთხოვნებს — გამოცდილების გაზიარებიდან პროექტის განვითარებამდე.",
     navigation: "შერჩევის ეტაპები",
     terminal: "პროექტის შერჩევის ტერმინალი",
-    titles: [
-      "განაცხადი",
-      "ტექნიკური შეფასება",
-      "გასაუბრება",
-      "პროექტის განვითარება",
-    ],
-    descriptions: [
-      "გამოცდილება და ნამუშევრები",
-      "დამოუკიდებელი სატესტო დავალება",
-      "პირობები და შეთანხმება",
-      "შეთანხმებული პროექტის შექმნა",
-    ],
+    // Inside ka:
+titles: [
+  "განაცხადი",
+  "ტექნიკური შეფასება",
+  "ტექნიკური შეფასება 2",
+  "გასაუბრება",
+  "პროექტის განვითარება",
+],
+descriptions: [
+  "გამოცდილება და ნამუშევრები",
+  "დამოუკიდებელი მარტივი სატესტო დავალება",
+  "Overgaang Challenge",
+  "პირობები და შეთანხმება",
+  "შეთანხმებული პროექტის შექმნა",
+],
     viewing: "მიმდინარე ხედი",
     open: "ეტაპის ნახვა",
     loaded: "ეტაპის ინფორმაცია ჩატვირთულია.",
@@ -48,18 +53,21 @@ const content = {
       "Explore each stage, from sharing your experience to developing the project.",
     navigation: "Selection stages",
     terminal: "Project recruitment terminal",
-    titles: [
-      "Application",
-      "Technical assessment",
-      "Interview",
-      "Project development",
-    ],
-    descriptions: [
-      "Experience and previous work",
-      "Standalone technical test",
-      "Terms and agreements",
-      "Build the agreed project",
-    ],
+    // Inside en:
+titles: [
+  "Application",
+  "Technical assessment",
+  "Technical assessment 2",
+  "Interview",
+  "Project development",
+],
+descriptions: [
+  "Experience and previous work",
+  "Standalone qualification test",
+  "Overgaang Challenge",
+  "Terms and agreements",
+  "Build the agreed project",
+],
     viewing: "CURRENT VIEW",
     open: "VIEW STAGE",
     loaded: "Stage information loaded.",

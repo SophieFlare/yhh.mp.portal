@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import WhiteBg from "../atoms/WhiteBg";
+import LTTHelp from "../extra/LTTHelp";
 
 const content = {
   ka: {
@@ -200,8 +201,7 @@ export default function LTT() {
     >
       <WhiteBg />
 
-      <div className="relative mx-auto w-full max-w-5xl px-5 pb-10 pt-24 sm:px-8 sm:pb-12 sm:pt-28">
-        {/* Back navigation */}
+    <div className="relative mx-auto w-full max-w-[1600px] px-5 pb-10 pt-24 sm:px-8 sm:pb-12 sm:pt-28 lg:px-12">    {/* Back navigation */}
         <div className="mb-8 flex items-center justify-between gap-4">
           <Link
             to="/levels"
@@ -216,9 +216,9 @@ export default function LTT() {
           >
             ASSESSMENT / 02
           </span>
+          
         </div>
-
-        {/* Overview */}
+ {/* Overview */}
         <header className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#0c0c0c]/90 p-6 shadow-[0_0_40px_rgba(255,255,255,0.035)] sm:p-9">
           <div
             aria-hidden="true"
@@ -279,7 +279,9 @@ export default function LTT() {
           <h2 className="text-sm font-semibold">{t.scopeTitle}</h2>
           <p className="mt-1 text-sm leading-7 text-zinc-400">{t.scope}</p>
         </aside>
-
+<div className="mb-12">
+  <LTTHelp documentImage="/img/esp32-test-document.png" />
+</div>
         <div className="space-y-12">
           {/* Requirements */}
           <section id="requirements" className="scroll-mt-24">

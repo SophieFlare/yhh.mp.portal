@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import NavbarPage from "./NavbarPage";
 
-const BRAND = "Sopxtech";
+const BRAND = "SopXtech";
 const SYMBOLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%<>/";
 
 function GlitchBrand() {
