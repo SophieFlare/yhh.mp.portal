@@ -241,8 +241,7 @@ export default function Hero() {
                 {t.label}
               </p>
 
-              <h1 className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[clamp(4rem,5vw,4rem)] font-semibold leading-tight tracking-tighter">
-                <span>YHH</span>
+              <h1 className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[6rem] font-semibold leading-tight tracking-tighter"> <span>YHH</span>
                 <span className="font-light text-zinc-600">×</span>
                 <span>{brand}</span>
               </h1>
@@ -250,8 +249,9 @@ export default function Hero() {
 
             {/* Mobile image fills the available middle space */}
             <div className="flex min-h-0 flex-1 items-center justify-center py-3 sm:hidden">
-             <div className="hidden min-h-0 items-center justify-center p-6 sm:flex">
-  <HeroImage className="-translate-x-[35px] w-[min(100%,45dvh)] max-w-[420px]" />
+{/* Mobile image */}
+<div className="flex min-h-0 flex-1 items-center justify-center p-6 sm:hidden">
+  <HeroImage className="w-[min(100%,30dvh)] max-w-[280px]" />
 </div>
             </div>
 
@@ -392,9 +392,10 @@ export default function Hero() {
           </div>
 
           {/* Tablet and desktop image */}
-          <div className="hidden min-h-0 items-center justify-center sm:flex">
-            <HeroImage className="-translate-x-[15px] w-[min(100%,45dvh)] max-w-[420px]" />
-          </div>
+{/* Tablet and desktop image */}
+<div className="relative hidden min-h-0 min-w-0 items-center justify-center overflow-visible p-6 sm:flex">
+  <HeroImage className="-translate-x-1/4 w-[min(100%,45dvh)] max-w-[420px]" />
+</div>
         </div>
 
         {/* Primary action */}

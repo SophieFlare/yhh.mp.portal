@@ -1,228 +1,320 @@
-import { useState } from "react";
+import { useId, useState } from "react";
+import { useLanguage } from "../../context/LanguageContext";
 import LvlOne from "../lvls/LvlOne";
 import LvlTwo from "../lvls/LvlTwo";
 import LvlThree from "../lvls/LvlThree";
 import LvlFour from "../lvls/LvlFour";
+import WhiteBg from "../atoms/WhiteBg";
 
 const levels = [
-  { title: "Application", component: LvlOne },
-  { title: "Assessment", component: LvlTwo },
-  { title: "Interview", component: LvlThree },
-  { title: "Project Development", component: LvlFour },
+  { id: "application", component: LvlOne },
+  { id: "assessment", component: LvlTwo },
+  { id: "interview", component: LvlThree },
+  { id: "development", component: LvlFour },
 ];
 
+const content = {
+  ka: {
+    label: "შერჩევის პროცესი",
+    title: "შენი შემდეგი ნაბიჯი.",
+    description:
+      "გაეცანი თითოეული ეტაპის მოთხოვნებს — გამოცდილების გაზიარებიდან პროექტის განვითარებამდე.",
+    navigation: "შერჩევის ეტაპები",
+    terminal: "პროექტის შერჩევის ტერმინალი",
+    titles: [
+      "განაცხადი",
+      "ტექნიკური შეფასება",
+      "გასაუბრება",
+      "პროექტის განვითარება",
+    ],
+    descriptions: [
+      "გამოცდილება და ნამუშევრები",
+      "დამოუკიდებელი სატესტო დავალება",
+      "პირობები და შეთანხმება",
+      "შეთანხმებული პროექტის შექმნა",
+    ],
+    viewing: "მიმდინარე ხედი",
+    open: "ეტაპის ნახვა",
+    loaded: "ეტაპის ინფორმაცია ჩატვირთულია.",
+    note: "ეტაპის გახსნა არ ნიშნავს მის გავლას ან დამტკიცებას.",
+    previous: "წინა",
+    next: "შემდეგი",
+    stage: "ეტაპი",
+  },
+  en: {
+    label: "SELECTION PROCESS",
+    title: "Your next step.",
+    description:
+      "Explore each stage, from sharing your experience to developing the project.",
+    navigation: "Selection stages",
+    terminal: "Project recruitment terminal",
+    titles: [
+      "Application",
+      "Technical assessment",
+      "Interview",
+      "Project development",
+    ],
+    descriptions: [
+      "Experience and previous work",
+      "Standalone technical test",
+      "Terms and agreements",
+      "Build the agreed project",
+    ],
+    viewing: "CURRENT VIEW",
+    open: "VIEW STAGE",
+    loaded: "Stage information loaded.",
+    note: "Viewing a stage does not mean it is completed or approved.",
+    previous: "Previous",
+    next: "Next",
+    stage: "STAGE",
+  },
+};
+
+function TerminalNodes() {
+  return (
+    <div
+      aria-hidden="true"
+      className="relative h-16 w-16 shrink-0"
+    >
+      <div className="absolute inset-0 rounded-full border border-white/15" />
+
+      <div className="absolute inset-0 motion-safe:animate-[spin_40s_linear_infinite]">
+        <span className="absolute left-1/2 top-0 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_10px_#ffffff80]" />
+        <span className="absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 translate-y-1/2 rounded-full bg-zinc-500" />
+      </div>
+
+      <div className="absolute inset-3 flex items-center justify-center rounded-full border border-white/10 font-mono text-xs text-zinc-500">
+        {">_"}
+      </div>
+    </div>
+  );
+}
+
 export default function Lvl() {
+  const { language } = useLanguage();
+  const locale = language === "en" ? "en" : "ka";
+  const t = content[locale];
+
   const [active, setActive] = useState(0);
+  const id = useId();
+  const panelId = `${id}-content`;
 
   const ActiveLevel = levels[active].component;
   const stage = String(active + 1).padStart(2, "0");
 
   return (
-    <div className="relative isolate min-h-full overflow-hidden bg-[#050505] px-3 pb-10 pt-20 font-mono text-white sm:px-6 sm:pb-16">
-      {/* Red background grid */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,0,51,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,0,51,0.08) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
+    <div
+      lang={locale}
+      className="relative isolate min-h-full overflow-hidden px-3 pb-12 pt-20 font-sans text-white sm:px-6"
+    >
+      <WhiteBg />
 
-      {/* Ambient red lighting */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-32 top-12 -z-10 h-80 w-80 rounded-full bg-[#ff0033]/15 blur-[100px]"
-      />
+      <div className="mx-auto max-w-5xl">
+        {/* Page introduction */}
+        <header className="mb-7 flex items-center justify-between gap-6">
+          <div>
+            <p className="mb-3 font-mono text-[9px] tracking-widest text-zinc-500">
+              {t.label} / 01—04
+            </p>
 
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-32 bottom-0 -z-10 h-96 w-96 rounded-full bg-[#ff0033]/10 blur-[120px]"
-      />
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              {t.title}
+            </h1>
 
-      <section
-        aria-label="Project recruitment terminal"
-        className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-xl border border-[#ff0033]/30 bg-[#080808]/95 shadow-[0_0_60px_#ff00330d,0_24px_80px_#00000099]"
-      >
-        {/* Terminal window bar */}
-        <header className="flex items-center justify-between gap-3 border-b border-[#ff0033]/20 bg-[#101010] px-4 py-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <div aria-hidden="true" className="flex shrink-0 gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#ff0033]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-zinc-600" />
-              <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-            </div>
-
-            <span className="truncate text-xs font-bold tracking-wider sm:text-sm">
-              sc4<span className="text-[#ff0033]">Terminal</span>
-            </span>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-400">
+              {t.description}
+            </p>
           </div>
 
-          <span className="flex shrink-0 items-center gap-2 text-[9px] tracking-widest text-zinc-400 sm:text-[10px]">
-            <span
-              aria-hidden="true"
-              className="h-1.5 w-1.5 rounded-full bg-[#ff0033] shadow-[0_0_10px_#ff0033]"
-            />
-            ONLINE
-          </span>
+          <div className="hidden pr-2 sm:block">
+            <TerminalNodes />
+          </div>
         </header>
 
-        {/* Command line */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-white/5 bg-black/50 px-4 py-3 text-[10px] sm:px-6 sm:text-xs">
-          <span className="text-[#ff0033]">guest@sc4</span>
-          <span className="text-zinc-600">:</span>
-          <span className="text-zinc-400">~/recruitment</span>
-          <span className="text-zinc-600">$</span>
-          <span className="text-zinc-300">open stage_{stage}</span>
-          <span
+        {/* Terminal */}
+        <section
+          aria-label={t.terminal}
+          className="overflow-hidden rounded-2xl border border-white/15 bg-[#080808]/95 shadow-[0_24px_80px_#00000060]"
+        >
+          <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-4 font-mono sm:px-6">
+            <div className="flex min-w-0 items-center gap-3">
+              <div aria-hidden="true" className="flex shrink-0 gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-zinc-300" />
+                <span className="h-2 w-2 rounded-full bg-zinc-600" />
+                <span className="h-2 w-2 rounded-full bg-zinc-800" />
+              </div>
+
+              <span className="truncate text-xs font-medium tracking-wide">
+                sc4<span className="text-zinc-400">Terminal</span>
+              </span>
+            </div>
+
+            <span className="flex shrink-0 items-center gap-2 text-[9px] tracking-widest text-zinc-500">
+              <span
+                aria-hidden="true"
+                className="h-1 w-1 rounded-full bg-white"
+              />
+              READY
+            </span>
+          </header>
+
+          {/* Command */}
+          <div
             aria-hidden="true"
-            className="h-3 w-1.5 bg-[#ff0033] shadow-[0_0_8px_#ff0033]"
-          />
-        </div>
-
-        <div className="flex flex-col md:flex-row">
-          {/* Mobile: 2-column grid. Desktop: sidebar. */}
-          <nav
-            aria-label="Hiring stages"
-            className="grid grid-cols-2 gap-2 border-b border-white/10 bg-black/30 p-3 sm:p-4 md:flex md:w-56 md:shrink-0 md:flex-col md:border-b-0 md:border-r"
+            className="flex flex-wrap items-center gap-2 border-b border-white/10 bg-black/30 px-4 py-3 font-mono text-[10px] sm:px-6"
           >
-            {levels.map((level, index) => {
-              const selected = active === index;
-              const number = String(index + 1).padStart(2, "0");
+            <span className="text-zinc-300">guest@sc4</span>
+            <span className="text-zinc-600">~/recruitment</span>
+            <span className="text-zinc-500">$</span>
+            <span className="text-zinc-400">open stage_{stage}</span>
+            <span className="h-3 w-1 bg-zinc-300 motion-safe:animate-pulse" />
+          </div>
 
-              return (
-                <button
-                  key={level.title}
-                  type="button"
-                  onClick={() => setActive(index)}
-                  aria-pressed={selected}
-                  aria-controls="level-content"
-                  className={`relative min-w-0 rounded-lg border p-3 text-left transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff0033] motion-reduce:transition-none ${
-                    selected
-                      ? "border-[#ff0033]/60 bg-[#ff0033]/10 shadow-[inset_0_0_20px_#ff003308]"
-                      : "border-white/10 bg-[#0b0b0b] hover:border-[#ff0033]/40 hover:bg-[#ff0033]/5"
-                  }`}
-                >
-                  {selected && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-y-3 left-0 w-0.5 bg-[#ff0033] shadow-[0_0_10px_#ff0033]"
-                    />
-                  )}
+          <div className="flex flex-col md:flex-row">
+            {/* Stage selector */}
+            <nav
+              aria-label={t.navigation}
+              className="grid grid-cols-2 gap-2 border-b border-white/10 bg-black/20 p-3 md:flex md:w-60 md:shrink-0 md:flex-col md:border-b-0 md:border-r md:p-4"
+            >
+              {levels.map((level, index) => {
+                const selected = active === index;
+                const number = String(index + 1).padStart(2, "0");
 
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`text-[9px] tracking-widest sm:text-[10px] ${
-                        selected ? "text-[#ff0033]" : "text-zinc-500"
-                      }`}
-                    >
-                      LEVEL_{number}
-                    </span>
-
-                    <span
-                      aria-hidden="true"
-                      className={`text-xs ${
-                        selected ? "text-[#ff0033]" : "text-zinc-700"
-                      }`}
-                    >
-                      {selected ? "●" : "○"}
-                    </span>
-                  </div>
-
-                  <span className="mt-2 block break-words text-xs font-bold leading-relaxed sm:text-sm">
-                    {level.title}
-                  </span>
-
-                  <span
-                    className={`mt-2 block text-[8px] tracking-wider sm:text-[9px] ${
-                      selected ? "text-zinc-300" : "text-zinc-600"
+                return (
+                  <button
+                    key={level.id}
+                    type="button"
+                    onClick={() => setActive(index)}
+                    aria-pressed={selected}
+                    aria-controls={panelId}
+                    className={`relative min-w-0 rounded-lg border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none ${
+                      selected
+                        ? "border-white/40 bg-white/[0.07]"
+                        : "border-white/10 hover:border-white/25 hover:bg-white/[0.025]"
                     }`}
                   >
-                    {selected ? "> ACTIVE_SESSION" : "> OPEN_STAGE"}
-                  </span>
-                </button>
-              );
-            })}
+                    <div className="flex items-center justify-between gap-2 font-mono text-[9px]">
+                      <span
+                        className={selected ? "text-white" : "text-zinc-500"}
+                      >
+                        LEVEL_{number}
+                      </span>
 
-            <div
-              aria-hidden="true"
-              className="mt-auto hidden pt-8 text-[9px] leading-6 tracking-wider text-zinc-600 md:block"
-            >
-              <p>
-                <span className="text-[#ff0033]/70">[SYS]</span> connection
-                established
-              </p>
-              <p>
-                <span className="text-[#ff0033]/70">[SYS]</span> modules ready
-              </p>
-              <p>
-                <span className="text-[#ff0033]/70">[SYS]</span> awaiting input_
-              </p>
-            </div>
-          </nav>
+                      <span
+                        aria-hidden="true"
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          selected ? "bg-white" : "bg-zinc-700"
+                        }`}
+                      />
+                    </div>
 
-          {/* Active stage */}
-          <div className="relative min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-            {/* Subtle terminal scan lines */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 opacity-[0.025]"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(0deg, transparent, transparent 3px, #ffffff 3px, #ffffff 4px)",
-              }}
-            />
+                    <span className="mt-3 block text-xs font-medium leading-5">
+                      {t.titles[index]}
+                    </span>
 
-            <div className="relative">
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-[9px] tracking-widest sm:text-[10px]">
-                <span className="text-zinc-500">
-                  TERMINAL <span className="text-[#ff0033]">/</span>{" "}
-                  STAGE_{stage}
-                </span>
+                    <span className="mt-1 hidden text-[10px] leading-5 text-zinc-500 md:block">
+                      {t.descriptions[index]}
+                    </span>
 
-                <span className="text-zinc-600">SESSION: SC4_0{active + 1}</span>
-              </div>
+                    <span className="mt-3 block font-mono text-[8px] text-zinc-500">
+                      {">"} {selected ? t.viewing : t.open}
+                    </span>
+                  </button>
+                );
+              })}
 
               <div
-                id="level-content"
-                key={active}
-                className="min-w-0 break-words [&_h2]:text-2xl sm:[&_h2]:text-3xl lg:[&_h2]:text-4xl [&_pre]:max-w-full [&_pre]:overflow-x-auto"
+                aria-hidden="true"
+                className="mt-auto hidden pt-8 font-mono text-[9px] leading-6 text-zinc-600 md:block"
               >
-                <div className="mb-6 flex items-start gap-2 text-[10px] leading-relaxed text-zinc-400 sm:text-xs">
-                  <span aria-hidden="true" className="text-[#ff0033]">
-                    [OK]
+                <p>[SYS] modules ready</p>
+                <p>[SYS] navigation enabled</p>
+                <p>[SYS] awaiting input_</p>
+              </div>
+            </nav>
+
+            {/* Stage content */}
+            <div className="relative min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.015]"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(0deg, transparent, transparent 3px, #ffffff 3px, #ffffff 4px)",
+                }}
+              />
+
+              <div className="relative">
+                <div className="mb-5 flex flex-wrap justify-between gap-2 font-mono text-[9px] tracking-wide text-zinc-500">
+                  <span>TERMINAL / STAGE_{stage}</span>
+                  <span className="text-zinc-600">
+                    VIEW: {levels[active].id.toUpperCase()}
                   </span>
-                  <span>Stage_{stage} loaded successfully.</span>
                 </div>
 
-                <ActiveLevel />
-              </div>
-
-              <footer className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-4 text-[9px] leading-relaxed text-zinc-500 sm:flex-row sm:items-center sm:justify-between sm:text-[10px]">
-                <span>
-                  <span aria-hidden="true" className="mr-2 text-[#ff0033]">
-                    ▸
+                <div className="mb-6 flex items-center gap-2 text-[10px] text-zinc-400">
+                  <span
+                    aria-hidden="true"
+                    className="font-mono text-zinc-300"
+                  >
+                    [OK]
                   </span>
-                  Select a stage to view its requirements.
-                </span>
+                  {t.loaded}
+                </div>
 
-                <span className="shrink-0 tracking-widest">
-                  STAGE <span className="text-white">{stage}</span>
-                  <span className="text-[#ff0033]"> / </span>
-                  04
-                </span>
-              </footer>
+                <div
+                  id={panelId}
+                  key={`${active}-${locale}`}
+                  className="min-w-0 break-words [&_h2]:text-2xl sm:[&_h2]:text-3xl [&_pre]:max-w-full [&_pre]:overflow-x-auto"
+                >
+                  {/* Greyscale also removes existing child accent colors */}
+                  <div className="grayscale">
+                    <ActiveLevel />
+                  </div>
+                </div>
+
+                {/* Navigation */}
+                <footer className="mt-8 border-t border-white/10 pt-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      disabled={active === 0}
+                      onClick={() => setActive((value) => value - 1)}
+                      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/15 px-3 text-xs text-zinc-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-white"
+                    >
+                      <span aria-hidden="true">←</span>
+                      {t.previous}
+                    </button>
+
+                    <span className="font-mono text-[9px] text-zinc-500">
+                      {stage} / 04
+                    </span>
+
+                    <button
+                      type="button"
+                      disabled={active === levels.length - 1}
+                      onClick={() => setActive((value) => value + 1)}
+                      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/15 px-3 text-xs text-zinc-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-white"
+                    >
+                      {t.next}
+                      <span aria-hidden="true">→</span>
+                    </button>
+                  </div>
+
+                  <p className="mt-4 text-[10px] leading-5 text-zinc-500">
+                    {t.note}
+                  </p>
+                </footer>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Terminal bottom light */}
-        <div
-          aria-hidden="true"
-          className="h-px bg-gradient-to-r from-transparent via-[#ff0033]/70 to-transparent"
-        />
-      </section>
+          <div
+            aria-hidden="true"
+            className="h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
+          />
+        </section>
+      </div>
     </div>
   );
 }
