@@ -25,7 +25,6 @@ const content = {
     terminal: "ეტაპების ტერმინალი",
     company: "კომპანიის შესახებ",
     concept: "პროექტის კონცეფცია",
-    core: "MP_01 / კონცეფციის ბირთვი",
   },
   en: {
     label: "DEVELOPERS & BUILDERS / MP TECHNOLOGY",
@@ -40,7 +39,6 @@ const content = {
     terminal: "Levels terminal",
     company: "About the company",
     concept: "Project concept",
-    core: "MP_01 / CONCEPT CORE",
   },
 };
 
@@ -48,149 +46,112 @@ export default function Hero() {
   const { language } = useLanguage();
   const locale = language === "en" ? "en" : "ka";
   const t = content[locale];
-
   const heroRef = useRef(null);
 
+  // Let the page grow and scroll at every screen size.
+  // Restore the surrounding layout when this page unmounts.
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 767px)");
-    let restore = () => {};
+    const hero = heroRef.current;
+    if (!hero) return;
 
-    function updateMobileScroll() {
-      restore();
+    const snapshots = [];
 
-      if (!media.matches || !heroRef.current) return;
+    for (let node = hero; node; node = node.parentElement) {
+      const properties = {
+        height: "auto",
+        "max-height": "none",
+        "overflow-y": "visible",
+        "overflow-x": "clip",
+        "touch-action": "pan-y pinch-zoom",
+        "overscroll-behavior-y": "auto",
+      };
 
-      document.documentElement.classList.add("hero-page-active");
-
-      const snapshots = [];
-
-      for (
-        let node = heroRef.current;
-        node;
-        node = node.parentElement
+      if (
+        node === document.documentElement ||
+        node === document.body
       ) {
-        const properties = {
-          height: "auto",
-          "max-height": "none",
-          "overflow-y": "visible",
-          "overflow-x": "clip",
-          "touch-action": "pan-y pinch-zoom",
-          "overscroll-behavior-y": "auto",
-        };
-
-        if (
-          node === document.documentElement ||
-          node === document.body
-        ) {
-          properties["overflow-y"] = "auto";
-        }
-
-        const position = window.getComputedStyle(node).position;
-
-        if (position === "fixed" || position === "absolute") {
-          properties.position = "relative";
-          properties.inset = "auto";
-        }
-
-        for (const [property, value] of Object.entries(properties)) {
-          snapshots.push([
-            node,
-            property,
-            node.style.getPropertyValue(property),
-            node.style.getPropertyPriority(property),
-          ]);
-
-          node.style.setProperty(property, value, "important");
-        }
+        properties["overflow-y"] = "auto";
       }
 
-      const allowNativeScroll = (event) => {
-        if (event.touches && event.touches.length > 1) return;
-        event.stopPropagation();
-      };
+      const position = window.getComputedStyle(node).position;
 
-      const hero = heroRef.current;
+      if (position === "fixed" || position === "absolute") {
+        properties.position = "relative";
+        properties.inset = "auto";
+      }
 
-      hero.addEventListener("touchmove", allowNativeScroll, {
-        passive: true,
-      });
+      for (const [property, value] of Object.entries(properties)) {
+        snapshots.push([
+          node,
+          property,
+          node.style.getPropertyValue(property),
+          node.style.getPropertyPriority(property),
+        ]);
 
-      hero.addEventListener("wheel", allowNativeScroll, {
-        passive: true,
-      });
-
-      restore = () => {
-        hero.removeEventListener("touchmove", allowNativeScroll);
-        hero.removeEventListener("wheel", allowNativeScroll);
-
-        for (
-          const [node, property, value, priority]
-          of snapshots.reverse()
-        ) {
-          if (value) {
-            node.style.setProperty(property, value, priority);
-          } else {
-            node.style.removeProperty(property);
-          }
-        }
-
-        document.documentElement.classList.remove("hero-page-active");
-        restore = () => {};
-      };
+        node.style.setProperty(property, value, "important");
+      }
     }
 
-    updateMobileScroll();
-    media.addEventListener("change", updateMobileScroll);
-
     return () => {
-      media.removeEventListener("change", updateMobileScroll);
-      restore();
+      for (const [node, property, value, priority] of snapshots.reverse()) {
+        if (value) {
+          node.style.setProperty(property, value, priority);
+        } else {
+          node.style.removeProperty(property);
+        }
+      }
     };
   }, []);
 
   return (
     <div
       ref={heroRef}
-      data-lenis-prevent-touch
+      data-lenis-prevent
       lang={locale}
       className="hero-layout relative isolate grid min-w-0 bg-black text-white xl:grid-cols-[minmax(0,1fr)_320px]"
     >
       <style>{`
         .hero-layout {
+          --hero-navbar-height: 64px;
           width: 100%;
-          min-height: calc(100dvh - 64px);
+          min-height: calc(100vh - var(--hero-navbar-height));
+          min-height: calc(100dvh - var(--hero-navbar-height));
+          align-items: stretch;
+        }
+
+        .hero-main {
+          min-height: calc(100vh - var(--hero-navbar-height));
+          min-height: calc(100dvh - var(--hero-navbar-height));
+          height: auto;
+          overflow: visible;
+        }
+
+        .hero-content {
+          flex: 0 0 auto;
+          align-items: start;
+        }
+
+        .hero-footer {
+          margin-top: auto;
+          flex-shrink: 0;
         }
 
         .hero-partner-panel {
           min-width: 0;
         }
 
+        .hero-partner-panel > * {
+          position: relative;
+          width: 100%;
+          height: auto;
+          min-height: 100%;
+          max-height: none;
+          overflow: visible;
+        }
+
         @media (max-width: 1279px) {
-          html.hero-page-active,
-          html.hero-page-active body,
-          html.hero-page-active #root {
-            height: auto !important;
-            min-height: 100%;
-            max-height: none !important;
-            overflow-y: auto !important;
-          }
-
-          .hero-layout {
-            height: auto !important;
-            max-height: none !important;
-            overflow: clip;
-          }
-
           .hero-partner-panel {
             border-top: 1px solid #ffffff33;
-          }
-
-          .hero-partner-panel > * {
-            position: relative !important;
-            width: 100% !important;
-            height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
           }
         }
 
@@ -216,21 +177,14 @@ export default function Hero() {
             font-size: 0.75em !important;
           }
 
-          .hero-core-caption {
-            display: none;
-          }
-
-          .hero-layout {
-            overflow: visible;
-          }
-
           .hero-layout p {
             overflow-wrap: anywhere;
           }
 
-          .hero-footer {
-            flex-direction: column;
-            align-items: stretch;
+          .hero-main {
+            padding-bottom: calc(
+              2rem + env(safe-area-inset-bottom, 0px)
+            );
           }
 
           .hero-action {
@@ -239,25 +193,15 @@ export default function Hero() {
             gap: 0.75rem;
             text-align: center;
           }
-
-          .hero-partner-panel {
-            padding-bottom: env(safe-area-inset-bottom, 0px);
-          }
         }
 
         @keyframes hero-turn {
-          to {
-            transform: rotate(360deg);
-          }
+          to { transform: rotate(360deg); }
         }
 
         @keyframes hero-breathe {
-          0%, 100% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 0.95;
-          }
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.95; }
         }
 
         @keyframes hero-scan {
@@ -324,13 +268,15 @@ export default function Hero() {
         }
       `}</style>
 
-      <section className="relative isolate flex min-w-0 flex-col px-4 pb-8 pt-8 font-sans sm:px-8 sm:pt-12 lg:px-10">
+      <section className="hero-main relative isolate flex min-w-0 flex-col px-4 pb-8 pt-8 font-sans sm:px-8 sm:pt-12 lg:px-10">
         <WhiteBg />
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/3 top-0 h-32 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-[65px]"
-        />
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div className="absolute left-1/3 top-0 h-32 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-[65px]" />
+        </div>
 
         <header className="hero-enter relative mt-4 shrink-0">
           <div className="flex items-start gap-3">
@@ -356,7 +302,7 @@ export default function Hero() {
             aria-hidden="true"
             className="mt-2 flex items-center gap-3"
           >
-            <span className="h-px w-12 bg-white/60" />
+            <span className="h-px w-12 shrink-0 bg-white/60" />
 
             <span className="font-mono text-[10px] leading-5 tracking-[0.12em] text-zinc-400 sm:text-xs">
               PEOPLE / IDEAS / TECHNOLOGY
@@ -364,14 +310,14 @@ export default function Hero() {
           </div>
         </header>
 
-        <div className="relative grid flex-1 items-center gap-5 py-7 sm:gap-8 sm:py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-6">
+        <div className="hero-content relative grid items-start gap-2 pb-2 pt-1 sm:gap-4 sm:pb-4 sm:pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
           <HeroTexts t={t} locale={locale} brand={brand} />
 
           <div
             className="hero-enter min-w-0 px-2 py-5 sm:px-3"
             style={{ animationDelay: "200ms" }}
           >
-            <HeroImage caption={t.core} />
+            <HeroImage />
           </div>
         </div>
 
