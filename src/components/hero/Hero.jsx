@@ -70,20 +70,20 @@ export default function Hero() {
 
     if (!hero || !main || !slot || !upper || !footer) return;
 
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    const ancestors = [];
+    const snapshots = [];
+
     let disposed = false;
     let frame = 0;
 
-    const snapshots = [];
-
-    function override(node, property, value) {
+    function remember(node, property) {
       snapshots.push({
         node,
         property,
         value: node.style.getPropertyValue(property),
         priority: node.style.getPropertyPriority(property),
       });
-
-      node.style.setProperty(property, value, "important");
     }
 
     for (
@@ -91,14 +91,47 @@ export default function Hero() {
       node;
       node = node.parentElement
     ) {
-      override(node, "min-height", "0");
-      override(node, "overflow-y", "hidden");
+      ancestors.push(node);
 
-      if (
-        node === document.body ||
-        node === document.documentElement
-      ) {
-        override(node, "height", "100%");
+      for (const property of [
+        "min-height",
+        "height",
+        "max-height",
+        "overflow-y",
+        "overflow-x",
+      ]) {
+        remember(node, property);
+      }
+    }
+
+    let previousMobile = null;
+
+    function applyPageMode() {
+      const mobile = mobileQuery.matches;
+
+      if (previousMobile === mobile) return;
+      previousMobile = mobile;
+
+      for (const node of ancestors) {
+        const isPage =
+          node === document.body ||
+          node === document.documentElement;
+
+        const properties = {
+          "min-height": "0",
+          height: mobile ? "auto" : "100%",
+          "max-height": "none",
+          "overflow-y": mobile
+            ? isPage
+              ? "auto"
+              : "visible"
+            : "hidden",
+          "overflow-x": "clip",
+        };
+
+        for (const [property, value] of Object.entries(properties)) {
+          node.style.setProperty(property, value, "important");
+        }
       }
     }
 
@@ -108,24 +141,63 @@ export default function Hero() {
         element.querySelector("nav[aria-label]")
     );
 
+    function updateFit(next) {
+      setFit((previous) => {
+        if (
+          Math.abs(previous.scale - next.scale) < 0.0001 &&
+          Math.abs(previous.footerScale - next.footerScale) <
+            0.0001 &&
+          Math.abs(previous.footerHeight - next.footerHeight) <
+            0.1
+        ) {
+          return previous;
+        }
+
+        return next;
+      });
+    }
+
     function measure() {
       if (disposed) return;
 
+      applyPageMode();
+
       const viewport = window.visualViewport;
-      const viewportBottom = viewport
-        ? viewport.offsetTop + viewport.height
+      const viewportHeight = viewport
+        ? viewport.height
         : window.innerHeight;
 
       const heroTop = hero.getBoundingClientRect().top;
-      const navbarBottom = navbar
-        ? navbar.getBoundingClientRect().bottom
-        : Math.max(heroTop, 80);
+      const navbarRect = navbar?.getBoundingClientRect();
+      const navbarPosition = navbar
+        ? window.getComputedStyle(navbar).position
+        : "static";
 
-      const clearance = Math.max(0, navbarBottom - heroTop);
-      const availableHeight = Math.max(
-        0,
-        viewportBottom - heroTop
-      );
+      const floatingNavbar =
+        navbarPosition === "fixed" ||
+        navbarPosition === "absolute" ||
+        navbarPosition === "sticky";
+
+      // Mobile scrolling must not change the hero's reserved height.
+      const flowNavbarHeight =
+        navbarRect && !floatingNavbar ? navbarRect.height : 0;
+
+      const clearance = navbarRect
+        ? mobileQuery.matches
+          ? floatingNavbar
+            ? Math.max(0, navbarRect.bottom)
+            : 0
+          : Math.max(0, navbarRect.bottom - heroTop)
+        : 0;
+
+      const availableHeight = mobileQuery.matches
+        ? Math.max(0, viewportHeight - flowNavbarHeight)
+        : Math.max(
+            0,
+            (viewport?.offsetTop ?? 0) +
+              viewportHeight -
+              heroTop
+          );
 
       hero.style.setProperty(
         "--hero-height",
@@ -136,6 +208,18 @@ export default function Hero() {
         "--navbar-clearance",
         `${clearance}px`
       );
+
+      if (mobileQuery.matches) {
+        upper.style.width = "100%";
+
+        updateFit({
+          scale: 1,
+          footerScale: 1,
+          footerHeight: 0,
+        });
+
+        return;
+      }
 
       const styles = window.getComputedStyle(main);
       const verticalPadding =
@@ -148,16 +232,13 @@ export default function Hero() {
       );
 
       const footerNaturalHeight = footer.offsetHeight;
-
       const footerScale = Math.min(
         1,
         (innerHeight * 0.4) /
           Math.max(1, footerNaturalHeight)
       );
 
-      const footerHeight =
-        footerNaturalHeight * footerScale;
-
+      const footerHeight = footerNaturalHeight * footerScale;
       const contentHeight = Math.max(
         0,
         innerHeight - footerHeight
@@ -165,8 +246,6 @@ export default function Hero() {
 
       const width = slot.clientWidth;
 
-      // Compensate for scaling so the visible content remains
-      // the full width of its container.
       function fits(scale) {
         upper.style.width = `${width / scale}px`;
 
@@ -198,22 +277,10 @@ export default function Hero() {
 
       upper.style.width = `${width / scale}px`;
 
-      setFit((previous) => {
-        if (
-          Math.abs(previous.scale - scale) < 0.0001 &&
-          Math.abs(previous.footerScale - footerScale) <
-            0.0001 &&
-          Math.abs(previous.footerHeight - footerHeight) <
-            0.1
-        ) {
-          return previous;
-        }
-
-        return {
-          scale,
-          footerScale,
-          footerHeight,
-        };
+      updateFit({
+        scale,
+        footerScale,
+        footerHeight,
       });
     }
 
@@ -232,13 +299,11 @@ export default function Hero() {
 
     if (navbar) observer.observe(navbar);
 
+    mobileQuery.addEventListener("change", scheduleMeasure);
     window.addEventListener("resize", scheduleMeasure);
+
     window.visualViewport?.addEventListener(
       "resize",
-      scheduleMeasure
-    );
-    window.visualViewport?.addEventListener(
-      "scroll",
       scheduleMeasure
     );
 
@@ -253,13 +318,11 @@ export default function Hero() {
       cancelAnimationFrame(frame);
       observer.disconnect();
 
+      mobileQuery.removeEventListener("change", scheduleMeasure);
       window.removeEventListener("resize", scheduleMeasure);
+
       window.visualViewport?.removeEventListener(
         "resize",
-        scheduleMeasure
-      );
-      window.visualViewport?.removeEventListener(
-        "scroll",
         scheduleMeasure
       );
 
@@ -273,9 +336,7 @@ export default function Hero() {
             snapshot.priority
           );
         } else {
-          snapshot.node.style.removeProperty(
-            snapshot.property
-          );
+          snapshot.node.style.removeProperty(snapshot.property);
         }
       }
     };
@@ -285,7 +346,6 @@ export default function Hero() {
     <div
       ref={heroRef}
       lang={locale}
-      data-lenis-prevent
       className="hero-layout relative isolate bg-black text-white"
     >
       <style>{`
@@ -435,22 +495,59 @@ export default function Hero() {
         }
 
         @media (max-width: 767px) {
+          .hero-layout {
+            display: block;
+            height: auto;
+            max-height: none;
+            min-height: var(--hero-height, calc(100dvh - 80px));
+            overflow: visible;
+          }
+
           .hero-main {
-            padding-left: 12px;
-            padding-right: 12px;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            min-height: var(--hero-height, calc(100dvh - 80px));
+            max-height: none;
+            overflow: visible;
+
+            padding: 20px 18px;
+            padding-top: calc(
+              var(--navbar-clearance, 0px) + 24px
+            );
+            padding-bottom: calc(
+              24px + env(safe-area-inset-bottom, 0px)
+            );
+          }
+
+          .hero-upper-slot {
+            flex: 0 0 auto;
+            min-height: 0;
+            overflow: visible;
+          }
+
+          .hero-upper-content {
+            position: relative;
+            inset: auto;
+            width: 100% !important;
+            margin: 0;
+            transform: none !important;
           }
 
           .hero-brand {
-            flex-wrap: nowrap;
-            gap: clamp(0.35rem, 2vw, 0.75rem);
-            font-size: clamp(1.3rem, 6.3vw, 2.8rem);
-            line-height: 1.25;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            margin-top: 16px;
+            font-size: clamp(1.7rem, 7vw, 3rem);
+            line-height: 1.15;
             letter-spacing: -0.05em;
-            white-space: nowrap;
+            white-space: normal;
           }
 
           .hero-brand > * {
-            flex-shrink: 0;
+            min-width: 0;
             font-size: inherit !important;
             white-space: nowrap;
           }
@@ -459,25 +556,68 @@ export default function Hero() {
             font-size: 0.75em !important;
           }
 
-          .hero-layout p {
-            overflow-wrap: anywhere;
+          .hero-content {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 24px;
+            padding-top: 24px;
+            padding-bottom: 0;
           }
 
-          .hero-content {
-            row-gap: 0;
+          .hero-content h2 {
+            font-size: clamp(1.6rem, 7vw, 2.25rem);
+            line-height: 1.3;
+          }
+
+          .hero-content p {
+            font-size: 15px;
+            line-height: 1.8;
+          }
+
+          .hero-layout p {
+            overflow-wrap: break-word;
           }
 
           .hero-image-slot {
-            margin-top: 8px;
-            padding-top: 0;
-            padding-bottom: 0;
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: 8px 0;
+          }
+
+          .hero-mobile-partner {
+            display: flow-root;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #ffffff33;
+          }
+
+          .hero-footer-slot {
+            width: 100%;
+            height: auto !important;
+            margin-top: auto;
+            padding-top: 28px;
+            align-self: stretch;
+          }
+
+          .hero-footer-fit {
+            width: 100%;
+            transform: none !important;
           }
 
           .hero-action {
             width: 100%;
             min-height: 56px;
-            gap: 0.75rem;
+            gap: 12px;
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.5;
             text-align: center;
+            white-space: normal;
+          }
+
+          .hero-partner-panel {
+            display: none;
           }
         }
 
@@ -546,10 +686,7 @@ export default function Hero() {
         }
       `}</style>
 
-      <section
-        ref={mainRef}
-        className="hero-main font-sans"
-      >
+      <section ref={mainRef} className="hero-main font-sans">
         <WhiteBg />
 
         <div
@@ -559,10 +696,7 @@ export default function Hero() {
           <div className="absolute left-1/3 top-0 h-32 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-[65px]" />
         </div>
 
-        <div
-          ref={upperSlotRef}
-          className="hero-upper-slot"
-        >
+        <div ref={upperSlotRef} className="hero-upper-slot">
           <div
             ref={upperRef}
             className="hero-upper-content"
@@ -589,10 +723,7 @@ export default function Hero() {
                   ×
                 </span>
 
-                <GlitchText
-                  text={brand}
-                  delay="-1.1s"
-                />
+                <GlitchText text={brand} delay="-1.1s" />
               </h1>
 
               <div
