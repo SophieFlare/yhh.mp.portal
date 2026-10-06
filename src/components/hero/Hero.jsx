@@ -1,19 +1,16 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { useLanguage } from "../../context/LanguageContext";
-
 import WhiteBg from "../atoms/WhiteBg";
 import GlitchText from "../atoms/GlitchText";
 import RP from "../sopo/RP";
-
 import HeroImage from "./HeroImage";
 import HeroFooter from "./HeroFooter";
 import HeroTexts from "./HeroTexts";
-
+import "../../styles/hero.css";
 const brand = "$0p̄Xt3c̄h";
-
 const content = {
   ka: {
-    label: "დეველოპერები და შემქმნელები / MP TECHNOLOGY",
+    label: "დეველოპერები & შემქმნელები / MP TECHNOLOGY",
     challenge: "მიიღე გამოწვევა.",
     headline: "შექმენი შენი გზა...",
     description:
@@ -43,23 +40,63 @@ const content = {
     concept: "Project concept",
   },
 };
-
 export default function Hero() {
   const { language } = useLanguage();
   const locale = language === "en" ? "en" : "ka";
   const t = content[locale];
-
   const heroRef = useRef(null);
+  const brandRef = useRef(null);
   const mainRef = useRef(null);
   const upperSlotRef = useRef(null);
   const upperRef = useRef(null);
   const footerRef = useRef(null);
-
   const [fit, setFit] = useState({
     scale: 1,
     footerScale: 1,
     footerHeight: 0,
   });
+  // Fit only the mobile brand; desktop typography stays unchanged.
+  useLayoutEffect(() => {
+    const heading = brandRef.current;
+    if (!heading) return;
+    const media = window.matchMedia("(max-width: 767px)");
+    let frame = 0;
+    let disposed = false;
+    function measureBrand() {
+      if (disposed) return;
+      if (!media.matches) {
+        heading.style.removeProperty("--mobile-brand-size");
+        return;
+      }
+      if (!heading.clientWidth) return;
+      let low = 1;
+      let high = 160;
+      for (let i = 0; i < 16; i += 1) {
+        const size = (low + high) / 2;
+        heading.style.setProperty("--mobile-brand-size", `${size}px`);
+        if (heading.scrollWidth <= heading.clientWidth) low = size;
+        else high = size;
+      }
+      heading.style.setProperty("--mobile-brand-size", `${Math.max(1, low - 0.5)}px`);
+    }
+    function schedule() {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measureBrand);
+    }
+    const observer = new ResizeObserver(schedule);
+    observer.observe(heading.parentElement);
+    media.addEventListener("change", schedule);
+    window.addEventListener("resize", schedule);
+    document.fonts?.ready.then(schedule);
+    measureBrand();
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      media.removeEventListener("change", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
 
   useLayoutEffect(() => {
     const hero = heroRef.current;
@@ -67,16 +104,12 @@ export default function Hero() {
     const slot = upperSlotRef.current;
     const upper = upperRef.current;
     const footer = footerRef.current;
-
     if (!hero || !main || !slot || !upper || !footer) return;
-
     const mobileQuery = window.matchMedia("(max-width: 767px)");
     const ancestors = [];
     const snapshots = [];
-
     let disposed = false;
     let frame = 0;
-
     function remember(node, property) {
       snapshots.push({
         node,
@@ -85,14 +118,12 @@ export default function Hero() {
         priority: node.style.getPropertyPriority(property),
       });
     }
-
     for (
       let node = hero.parentElement;
       node;
       node = node.parentElement
     ) {
       ancestors.push(node);
-
       for (const property of [
         "min-height",
         "height",
@@ -103,20 +134,15 @@ export default function Hero() {
         remember(node, property);
       }
     }
-
     let previousMobile = null;
-
     function applyPageMode() {
       const mobile = mobileQuery.matches;
-
       if (previousMobile === mobile) return;
       previousMobile = mobile;
-
       for (const node of ancestors) {
         const isPage =
           node === document.body ||
           node === document.documentElement;
-
         const properties = {
           "min-height": "0",
           height: mobile ? "auto" : "100%",
@@ -128,19 +154,16 @@ export default function Hero() {
             : "hidden",
           "overflow-x": "clip",
         };
-
         for (const [property, value] of Object.entries(properties)) {
           node.style.setProperty(property, value, "important");
         }
       }
     }
-
     const navbar = [...document.querySelectorAll("header")].find(
       (element) =>
         !hero.contains(element) &&
         element.querySelector("nav[aria-label]")
     );
-
     function updateFit(next) {
       setFit((previous) => {
         if (
@@ -152,36 +175,28 @@ export default function Hero() {
         ) {
           return previous;
         }
-
         return next;
       });
     }
-
     function measure() {
       if (disposed) return;
-
       applyPageMode();
-
       const viewport = window.visualViewport;
       const viewportHeight = viewport
         ? viewport.height
         : window.innerHeight;
-
       const heroTop = hero.getBoundingClientRect().top;
       const navbarRect = navbar?.getBoundingClientRect();
       const navbarPosition = navbar
         ? window.getComputedStyle(navbar).position
         : "static";
-
       const floatingNavbar =
         navbarPosition === "fixed" ||
         navbarPosition === "absolute" ||
         navbarPosition === "sticky";
-
       // Mobile scrolling must not change the hero's reserved height.
       const flowNavbarHeight =
         navbarRect && !floatingNavbar ? navbarRect.height : 0;
-
       const clearance = navbarRect
         ? mobileQuery.matches
           ? floatingNavbar
@@ -189,7 +204,6 @@ export default function Hero() {
             : 0
           : Math.max(0, navbarRect.bottom - heroTop)
         : 0;
-
       const availableHeight = mobileQuery.matches
         ? Math.max(0, viewportHeight - flowNavbarHeight)
         : Math.max(
@@ -198,136 +212,102 @@ export default function Hero() {
               viewportHeight -
               heroTop
           );
-
       hero.style.setProperty(
         "--hero-height",
         `${availableHeight}px`
       );
-
       hero.style.setProperty(
         "--navbar-clearance",
         `${clearance}px`
       );
-
       if (mobileQuery.matches) {
         upper.style.width = "100%";
-
         updateFit({
           scale: 1,
           footerScale: 1,
           footerHeight: 0,
         });
-
         return;
       }
-
       const styles = window.getComputedStyle(main);
       const verticalPadding =
         parseFloat(styles.paddingTop) +
         parseFloat(styles.paddingBottom);
-
       const innerHeight = Math.max(
         0,
         main.clientHeight - verticalPadding
       );
-
       const footerNaturalHeight = footer.offsetHeight;
       const footerScale = Math.min(
         1,
         (innerHeight * 0.4) /
           Math.max(1, footerNaturalHeight)
       );
-
       const footerHeight = footerNaturalHeight * footerScale;
       const contentHeight = Math.max(
         0,
         innerHeight - footerHeight
       );
-
       const width = slot.clientWidth;
-
       function fits(scale) {
         upper.style.width = `${width / scale}px`;
-
         return (
           Math.max(upper.offsetHeight, upper.scrollHeight) *
             scale <=
           contentHeight
         );
       }
-
       let scale = 1;
-
       if (!fits(1)) {
         let low = 0.001;
         let high = 1;
-
         for (let index = 0; index < 16; index += 1) {
           const middle = (low + high) / 2;
-
           if (fits(middle)) {
             low = middle;
           } else {
             high = middle;
           }
         }
-
         scale = low;
       }
-
       upper.style.width = `${width / scale}px`;
-
       updateFit({
         scale,
         footerScale,
         footerHeight,
       });
     }
-
     function scheduleMeasure() {
       if (disposed) return;
-
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(measure);
     }
-
     const observer = new ResizeObserver(scheduleMeasure);
-
     observer.observe(main);
     observer.observe(upper);
     observer.observe(footer);
-
     if (navbar) observer.observe(navbar);
-
     mobileQuery.addEventListener("change", scheduleMeasure);
     window.addEventListener("resize", scheduleMeasure);
-
     window.visualViewport?.addEventListener(
       "resize",
       scheduleMeasure
     );
-
     hero.addEventListener("load", scheduleMeasure, true);
     document.fonts?.ready.then(scheduleMeasure);
-
     measure();
-
     return () => {
       disposed = true;
-
       cancelAnimationFrame(frame);
       observer.disconnect();
-
       mobileQuery.removeEventListener("change", scheduleMeasure);
       window.removeEventListener("resize", scheduleMeasure);
-
       window.visualViewport?.removeEventListener(
         "resize",
         scheduleMeasure
       );
-
       hero.removeEventListener("load", scheduleMeasure, true);
-
       for (const snapshot of snapshots.reverse()) {
         if (snapshot.value) {
           snapshot.node.style.setProperty(
@@ -341,361 +321,20 @@ export default function Hero() {
       }
     };
   }, [locale]);
-
   return (
     <div
       ref={heroRef}
       lang={locale}
       className="hero-layout relative isolate bg-black text-white"
     >
-      <style>{`
-        .hero-layout {
-          box-sizing: border-box;
-          display: grid;
-          grid-template-columns: minmax(0, 1fr);
-          grid-template-rows: minmax(0, 1fr);
-          width: 100%;
-          height: var(--hero-height, calc(100dvh - 80px));
-          min-width: 0;
-          min-height: 0;
-          overflow: hidden;
-        }
-
-        .hero-main {
-          box-sizing: border-box;
-          position: relative;
-          isolation: isolate;
-          display: grid;
-          grid-template-rows: minmax(0, 1fr) auto;
-          gap: 0;
-          height: 100%;
-          min-width: 0;
-          min-height: 0;
-          overflow: hidden;
-          padding: 12px 16px;
-          padding-top: calc(
-            var(--navbar-clearance, 0px) +
-            clamp(16px, 3dvh, 32px)
-          );
-          padding-bottom: max(
-            12px,
-            env(safe-area-inset-bottom, 0px)
-          );
-        }
-
-        .hero-upper-slot {
-          position: relative;
-          min-width: 0;
-          min-height: 0;
-          overflow: hidden;
-        }
-
-        .hero-upper-content {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          display: flow-root;
-          width: 100%;
-          min-width: 0;
-          transform-origin: bottom left;
-        }
-
-        .hero-content {
-          min-width: 0;
-          padding-bottom: 0;
-        }
-
-        .hero-footer-slot {
-          position: relative;
-          min-width: 0;
-          align-self: end;
-        }
-
-        .hero-footer-fit {
-          display: flow-root;
-          width: 100%;
-          transform-origin: top center;
-        }
-
-        .hero-footer-fit .hero-footer {
-          position: relative !important;
-          inset: auto !important;
-          margin-top: 0 !important;
-          padding-top: 0 !important;
-          background: transparent;
-          box-shadow: none;
-          backdrop-filter: none;
-        }
-
-        .hero-mobile-partner {
-          display: flow-root;
-          min-width: 0;
-          margin-top: 12px;
-          border-top: 1px solid #ffffff33;
-        }
-
-        .hero-mobile-partner > * {
-          position: relative !important;
-          inset: auto !important;
-          box-sizing: border-box;
-          width: 100% !important;
-          height: auto !important;
-          min-height: 0 !important;
-          max-height: none !important;
-          overflow: visible !important;
-        }
-
-        .hero-partner-panel {
-          display: none;
-          box-sizing: border-box;
-          height: 100%;
-          min-width: 0;
-          min-height: 0;
-          overflow: hidden;
-          border-left: 1px solid #ffffff33;
-          padding-top: var(--navbar-clearance, 0px);
-        }
-
-        .hero-partner-panel > * {
-          position: relative;
-          box-sizing: border-box;
-          width: 100%;
-          height: 100%;
-          min-height: 0;
-          max-height: 100%;
-          overflow: hidden;
-        }
-
-        @media (min-width: 640px) {
-          .hero-main {
-            padding-left: 32px;
-            padding-right: 32px;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .hero-main {
-            padding-left: 40px;
-            padding-right: 40px;
-          }
-        }
-
-        @media (min-width: 1280px) {
-          .hero-layout {
-            grid-template-columns: minmax(0, 1fr) 320px;
-          }
-
-          .hero-mobile-partner {
-            display: none;
-          }
-
-          .hero-partner-panel {
-            display: block;
-          }
-        }
-
-        @media (max-width: 767px) {
-          .hero-layout {
-            display: block;
-            height: auto;
-            max-height: none;
-            min-height: var(--hero-height, calc(100dvh - 80px));
-            overflow: visible;
-          }
-
-          .hero-main {
-            display: flex;
-            flex-direction: column;
-            height: auto;
-            min-height: var(--hero-height, calc(100dvh - 80px));
-            max-height: none;
-            overflow: visible;
-
-            padding: 20px 18px;
-            padding-top: calc(
-              var(--navbar-clearance, 0px) + 24px
-            );
-            padding-bottom: calc(
-              24px + env(safe-area-inset-bottom, 0px)
-            );
-          }
-
-          .hero-upper-slot {
-            flex: 0 0 auto;
-            min-height: 0;
-            overflow: visible;
-          }
-
-          .hero-upper-content {
-            position: relative;
-            inset: auto;
-            width: 100% !important;
-            margin: 0;
-            transform: none !important;
-          }
-
-          .hero-brand {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            gap: 8px;
-            margin-top: 16px;
-            font-size: clamp(1.7rem, 7vw, 3rem);
-            line-height: 1.15;
-            letter-spacing: -0.05em;
-            white-space: normal;
-          }
-
-          .hero-brand > * {
-            min-width: 0;
-            font-size: inherit !important;
-            white-space: nowrap;
-          }
-
-          .hero-brand > span:nth-child(2) {
-            font-size: 0.75em !important;
-          }
-
-          .hero-content {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr);
-            gap: 24px;
-            padding-top: 24px;
-            padding-bottom: 0;
-          }
-
-          .hero-content h2 {
-            font-size: clamp(1.6rem, 7vw, 2.25rem);
-            line-height: 1.3;
-          }
-
-          .hero-content p {
-            font-size: 15px;
-            line-height: 1.8;
-          }
-
-          .hero-layout p {
-            overflow-wrap: break-word;
-          }
-
-          .hero-image-slot {
-            width: 100%;
-            min-width: 0;
-            margin: 0;
-            padding: 8px 0;
-          }
-
-          .hero-mobile-partner {
-            display: flow-root;
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid #ffffff33;
-          }
-
-          .hero-footer-slot {
-            width: 100%;
-            height: auto !important;
-            margin-top: auto;
-            padding-top: 28px;
-            align-self: stretch;
-          }
-
-          .hero-footer-fit {
-            width: 100%;
-            transform: none !important;
-          }
-
-          .hero-action {
-            width: 100%;
-            min-height: 56px;
-            gap: 12px;
-            padding: 16px;
-            font-size: 14px;
-            line-height: 1.5;
-            text-align: center;
-            white-space: normal;
-          }
-
-          .hero-partner-panel {
-            display: none;
-          }
-        }
-
-        @keyframes hero-turn {
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes hero-breathe {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 0.95; }
-        }
-
-        @keyframes hero-scan {
-          0% { top: 0; opacity: 0; }
-          15%, 80% { opacity: 0.55; }
-          100% { top: 100%; opacity: 0; }
-        }
-
-        @keyframes hero-enter {
-          from {
-            opacity: 0;
-            transform: translateY(12px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .hero-orbit {
-          animation: hero-turn 38s linear infinite;
-        }
-
-        .hero-orbit-reverse {
-          animation: hero-turn 52s linear infinite reverse;
-        }
-
-        .hero-breathe {
-          animation: hero-breathe 7s ease-in-out infinite;
-        }
-
-        .hero-scan {
-          animation: hero-scan 10s linear infinite;
-        }
-
-        .hero-enter {
-          animation: hero-enter 0.8s ease-out both;
-        }
-
-        .hero-node {
-          box-shadow: 0 0 14px white, 0 0 30px #ffffff90;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .hero-orbit,
-          .hero-orbit-reverse,
-          .hero-breathe,
-          .hero-scan,
-          .hero-enter {
-            animation: none;
-          }
-
-          .hero-scan {
-            display: none;
-          }
-        }
-      `}</style>
-
       <section ref={mainRef} className="hero-main font-sans">
         <WhiteBg />
-
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 overflow-hidden"
         >
           <div className="absolute left-1/3 top-0 h-32 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-[65px]" />
         </div>
-
         <div ref={upperSlotRef} className="hero-upper-slot">
           <div
             ref={upperRef}
@@ -710,41 +349,33 @@ export default function Hero() {
                   aria-hidden="true"
                   className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white shadow-[0_0_8px_white]"
                 />
-
                 <p className="text-xs font-medium leading-6 text-zinc-300 sm:text-sm">
                   {t.label}
                 </p>
               </div>
-
-              <h1 className="hero-brand mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono text-[clamp(2.3rem,7vw,6rem)] font-semibold leading-[1.05] tracking-tighter lg:text-[7rem]">
+              <h1 ref={brandRef} className="hero-brand mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono text-[clamp(2.3rem,7vw,6rem)] font-semibold leading-[1.05] tracking-tighter lg:text-[7rem]">
                 <GlitchText text="YHH" />
-
                 <span className="font-light text-zinc-400">
                   ×
                 </span>
-
                 <GlitchText text={brand} delay="-1.1s" />
               </h1>
-
               <div
                 aria-hidden="true"
                 className="mt-2 flex items-center gap-3"
               >
                 <span className="h-px w-12 shrink-0 bg-white/60" />
-
                 <span className="font-mono text-[10px] leading-5 tracking-[0.12em] text-zinc-400 sm:text-xs">
                   PEOPLE / IDEAS / TECHNOLOGY
                 </span>
               </div>
             </header>
-
             <div className="hero-content relative grid items-start gap-2 pt-1 sm:gap-4 sm:pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
               <HeroTexts
                 t={t}
                 locale={locale}
                 brand={brand}
               />
-
               <div
                 className="hero-image-slot hero-enter mt-8 min-w-0 px-2 pb-0 pt-5 sm:px-3 md:mt-0 md:py-5"
                 style={{ animationDelay: "200ms" }}
@@ -752,13 +383,11 @@ export default function Hero() {
                 <HeroImage />
               </div>
             </div>
-
             <div className="hero-mobile-partner">
               <RP />
             </div>
           </div>
         </div>
-
         <div
           className="hero-footer-slot"
           style={{ height: fit.footerHeight }}
@@ -774,7 +403,6 @@ export default function Hero() {
           </div>
         </div>
       </section>
-
       <div className="hero-partner-panel">
         <RP />
       </div>

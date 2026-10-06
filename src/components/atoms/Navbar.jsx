@@ -162,7 +162,7 @@ export default function Navbar() {
         }
       `}</style>
 
-      <header className="relative z-50 w-full font-mono text-white">
+<header className="relative z-50 w-full shrink-0 font-mono text-white">
         <nav
           aria-label={
             isGeorgian ? "მთავარი ნავიგაცია" : "Main navigation"

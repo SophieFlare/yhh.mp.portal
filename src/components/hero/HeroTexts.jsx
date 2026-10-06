@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import HeroInfo from "./HeroInfo";
 
 function TypedHeadline({ text, animate }) {
   const [display, setDisplay] = useState(animate ? "" : text);
@@ -82,49 +83,18 @@ export default function HeroTexts({ t, locale, brand }) {
         {t.description}
       </p>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        {["ESP32", "ELECTRONICS", "PROTOTYPING"].map((item) => (
-          <span
-            key={item}
-            className="rounded-md border border-white/20 bg-white/[0.05] px-3 py-2 font-mono text-xs text-zinc-300"
-          >
-            {item}
-          </span>
-        ))}
-      </div>
+<div className="mt-5 flex w-full flex-nowrap gap-2 sm:flex-wrap">
+  {["ESP32", "ELECTRONICS", "PROTOTYPING"].map((item) => (
+    <span
+      key={item}
+      className="min-w-0 flex-1 whitespace-nowrap rounded-md border border-white/20 bg-white/[0.05] px-1 py-2 text-center font-mono text-[clamp(9px,2.8vw,12px)] text-zinc-300 sm:flex-none sm:px-3 sm:text-xs"
+    >
+      {item}
+    </span>
+  ))}
+</div>
 
-      <div className="mt-7 grid grid-cols-2 gap-3 border-t border-white/20 pt-5 sm:gap-5">
-        <Link
-          to="/about"
-          aria-label={t.company}
-          className="group min-w-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-        >
-          <p className="flex items-start justify-between gap-1 text-xs font-semibold leading-5 text-zinc-200 transition-colors group-hover:text-white sm:text-sm">
-            <span>YHH / Your Health Huddle</span>
-
-            <span
-              aria-hidden="true"
-              className="shrink-0 text-sm text-zinc-500 transition-colors group-hover:text-white sm:text-lg"
-            >
-              ↗
-            </span>
-          </p>
-
-          <p className="mt-2 break-words text-[11px] leading-5 text-zinc-500 transition-colors group-hover:text-zinc-300 sm:text-[13px] sm:leading-6">
-            {t.awareness}
-          </p>
-        </Link>
-
-        <div className="group min-w-0">
-          <p className="break-words text-xs font-semibold leading-5 text-zinc-200 transition-colors group-hover:text-white sm:text-sm">
-            {brand} / {t.sopo}
-          </p>
-
-          <p className="mt-2 break-words text-[11px] leading-5 text-zinc-500 transition-colors group-hover:text-zinc-300 sm:text-sm sm:leading-6">
-            {t.coordination}
-          </p>
-        </div>
-      </div>
+    <HeroInfo t={t} locale={locale} brand={brand} />
     </div>
   );
 }
