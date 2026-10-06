@@ -19,7 +19,8 @@ const content = {
     description:
       "მიიღე მონაწილეობა MP ტექნოლოგიის შექმნაში — ESP32 პროგრამირებით, ელექტრონიკით ან პროტოტიპის დამზადებით. გაეცანი ეტაპებს და გვაჩვენე შენი შესაძლებლობები.",
     awareness: "ტექნოლოგია ცნობიერების ასამაღლებლად.",
-    coordination: "პროექტის კოორდინაცია · რეკრუტინგი · ვებდეველოპმენტი",
+    coordination:
+      "პროექტის კოორდინაცია · რეკრუტინგი · ვებდეველოპმენტი",
     sopo: "სოფო",
     process: "გაეცანი პროცესს და შემდეგ ნაბიჯებს",
     terminal: "ეტაპების ტერმინალი",
@@ -33,7 +34,8 @@ const content = {
     description:
       "Help bring MP Technology to life through ESP32 programming, electronics, or prototyping. Explore the stages and show us what you can build.",
     awareness: "Technology that creates awareness.",
-    coordination: "Project coordination · Recruitment · Web Development",
+    coordination:
+      "Project coordination · Recruitment · Web Development",
     sopo: "Sopo",
     process: "EXPLORE THE PROCESS AND YOUR NEXT STEPS",
     terminal: "Levels terminal",
@@ -49,11 +51,12 @@ export default function Hero() {
 
   const heroRef = useRef(null);
   const mainRef = useRef(null);
-  const contentRef = useRef(null);
+  const upperSlotRef = useRef(null);
+  const upperRef = useRef(null);
   const footerRef = useRef(null);
 
   const [fit, setFit] = useState({
-    contentScale: 1,
+    scale: 1,
     footerScale: 1,
     footerHeight: 0,
   });
@@ -61,10 +64,14 @@ export default function Hero() {
   useLayoutEffect(() => {
     const hero = heroRef.current;
     const main = mainRef.current;
-    const upper = contentRef.current;
+    const slot = upperSlotRef.current;
+    const upper = upperRef.current;
     const footer = footerRef.current;
 
-    if (!hero || !main || !upper || !footer) return;
+    if (!hero || !main || !slot || !upper || !footer) return;
+
+    let disposed = false;
+    let frame = 0;
 
     const snapshots = [];
 
@@ -79,7 +86,11 @@ export default function Hero() {
       node.style.setProperty(property, value, "important");
     }
 
-    for (let node = hero.parentElement; node; node = node.parentElement) {
+    for (
+      let node = hero.parentElement;
+      node;
+      node = node.parentElement
+    ) {
       override(node, "min-height", "0");
       override(node, "overflow-y", "hidden");
 
@@ -91,8 +102,11 @@ export default function Hero() {
       }
     }
 
-    let frame = 0;
-    let disposed = false;
+    const navbar = [...document.querySelectorAll("header")].find(
+      (element) =>
+        !hero.contains(element) &&
+        element.querySelector("nav[aria-label]")
+    );
 
     function measure() {
       if (disposed) return;
@@ -102,46 +116,101 @@ export default function Hero() {
         ? viewport.offsetTop + viewport.height
         : window.innerHeight;
 
-      const top = hero.getBoundingClientRect().top;
-      const availableHeight = Math.max(0, viewportBottom - top);
+      const heroTop = hero.getBoundingClientRect().top;
+      const navbarBottom = navbar
+        ? navbar.getBoundingClientRect().bottom
+        : Math.max(heroTop, 80);
+
+      const clearance = Math.max(0, navbarBottom - heroTop);
+      const availableHeight = Math.max(
+        0,
+        viewportBottom - heroTop
+      );
 
       hero.style.setProperty(
-        "--hero-available-height",
+        "--hero-height",
         `${availableHeight}px`
       );
 
+      hero.style.setProperty(
+        "--navbar-clearance",
+        `${clearance}px`
+      );
+
       const styles = window.getComputedStyle(main);
-      const padding =
+      const verticalPadding =
         parseFloat(styles.paddingTop) +
         parseFloat(styles.paddingBottom);
 
-      const innerHeight = Math.max(0, main.clientHeight - padding);
+      const innerHeight = Math.max(
+        0,
+        main.clientHeight - verticalPadding
+      );
+
       const footerNaturalHeight = footer.offsetHeight;
 
       const footerScale = Math.min(
         1,
-        (innerHeight * 0.4) / Math.max(1, footerNaturalHeight)
+        (innerHeight * 0.4) /
+          Math.max(1, footerNaturalHeight)
       );
 
-      const footerHeight = footerNaturalHeight * footerScale;
-      const contentHeight = Math.max(0, innerHeight - footerHeight);
+      const footerHeight =
+        footerNaturalHeight * footerScale;
 
-      const contentScale = Math.min(
-        1,
-        contentHeight / Math.max(1, upper.offsetHeight)
+      const contentHeight = Math.max(
+        0,
+        innerHeight - footerHeight
       );
+
+      const width = slot.clientWidth;
+
+      // Compensate for scaling so the visible content remains
+      // the full width of its container.
+      function fits(scale) {
+        upper.style.width = `${width / scale}px`;
+
+        return (
+          Math.max(upper.offsetHeight, upper.scrollHeight) *
+            scale <=
+          contentHeight
+        );
+      }
+
+      let scale = 1;
+
+      if (!fits(1)) {
+        let low = 0.001;
+        let high = 1;
+
+        for (let index = 0; index < 16; index += 1) {
+          const middle = (low + high) / 2;
+
+          if (fits(middle)) {
+            low = middle;
+          } else {
+            high = middle;
+          }
+        }
+
+        scale = low;
+      }
+
+      upper.style.width = `${width / scale}px`;
 
       setFit((previous) => {
         if (
-          Math.abs(previous.contentScale - contentScale) < 0.001 &&
-          Math.abs(previous.footerScale - footerScale) < 0.001 &&
-          Math.abs(previous.footerHeight - footerHeight) < 0.5
+          Math.abs(previous.scale - scale) < 0.0001 &&
+          Math.abs(previous.footerScale - footerScale) <
+            0.0001 &&
+          Math.abs(previous.footerHeight - footerHeight) <
+            0.1
         ) {
           return previous;
         }
 
         return {
-          contentScale,
+          scale,
           footerScale,
           footerHeight,
         };
@@ -149,6 +218,8 @@ export default function Hero() {
     }
 
     function scheduleMeasure() {
+      if (disposed) return;
+
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(measure);
     }
@@ -159,16 +230,26 @@ export default function Hero() {
     observer.observe(upper);
     observer.observe(footer);
 
-    window.addEventListener("resize", scheduleMeasure);
-    window.visualViewport?.addEventListener("resize", scheduleMeasure);
-    window.visualViewport?.addEventListener("scroll", scheduleMeasure);
+    if (navbar) observer.observe(navbar);
 
+    window.addEventListener("resize", scheduleMeasure);
+    window.visualViewport?.addEventListener(
+      "resize",
+      scheduleMeasure
+    );
+    window.visualViewport?.addEventListener(
+      "scroll",
+      scheduleMeasure
+    );
+
+    hero.addEventListener("load", scheduleMeasure, true);
     document.fonts?.ready.then(scheduleMeasure);
 
     measure();
 
     return () => {
       disposed = true;
+
       cancelAnimationFrame(frame);
       observer.disconnect();
 
@@ -182,6 +263,8 @@ export default function Hero() {
         scheduleMeasure
       );
 
+      hero.removeEventListener("load", scheduleMeasure, true);
+
       for (const snapshot of snapshots.reverse()) {
         if (snapshot.value) {
           snapshot.node.style.setProperty(
@@ -190,69 +273,75 @@ export default function Hero() {
             snapshot.priority
           );
         } else {
-          snapshot.node.style.removeProperty(snapshot.property);
+          snapshot.node.style.removeProperty(
+            snapshot.property
+          );
         }
       }
     };
-  }, []);
+  }, [locale]);
 
   return (
     <div
       ref={heroRef}
-      data-lenis-prevent
       lang={locale}
-      className="hero-layout relative isolate grid min-w-0 bg-black text-white"
+      data-lenis-prevent
+      className="hero-layout relative isolate bg-black text-white"
     >
       <style>{`
         .hero-layout {
-          width: 100%;
-          height: var(--hero-available-height, calc(100dvh - 80px));
-          min-height: 0;
-          max-height: var(--hero-available-height, calc(100dvh - 80px));
-          overflow: hidden;
-          align-items: stretch;
+          box-sizing: border-box;
+          display: grid;
           grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr);
+          width: 100%;
+          height: var(--hero-height, calc(100dvh - 80px));
+          min-width: 0;
+          min-height: 0;
+          overflow: hidden;
         }
 
         .hero-main {
-          height: 100%;
-          min-height: 0;
-          min-width: 0;
-          overflow: hidden;
+          box-sizing: border-box;
+          position: relative;
+          isolation: isolate;
           display: grid;
           grid-template-rows: minmax(0, 1fr) auto;
           gap: 0;
-          padding: clamp(8px, 2dvh, 24px) 16px;
+          height: 100%;
+          min-width: 0;
+          min-height: 0;
+          overflow: hidden;
+          padding: 12px 16px;
+          padding-top: calc(
+            var(--navbar-clearance, 0px) +
+            clamp(16px, 3dvh, 32px)
+          );
           padding-bottom: max(
             12px,
             env(safe-area-inset-bottom, 0px)
           );
-          padding-top: calc(
-  var(--hero-navbar-clearance, 0px) +
-  clamp(16px, 3dvh, 32px) +
-  3dvh
-);
         }
 
         .hero-upper-slot {
           position: relative;
-          min-height: 0;
           min-width: 0;
+          min-height: 0;
           overflow: hidden;
         }
 
         .hero-upper-content {
-          display: flow-root;
           position: absolute;
           bottom: 0;
           left: 0;
+          display: flow-root;
           width: 100%;
-          transform-origin: bottom center;
+          min-width: 0;
+          transform-origin: bottom left;
         }
 
         .hero-content {
           min-width: 0;
-          align-items: start;
           padding-bottom: 0;
         }
 
@@ -278,20 +367,38 @@ export default function Hero() {
           backdrop-filter: none;
         }
 
-        .hero-image-slot {
+        .hero-mobile-partner {
+          display: flow-root;
           min-width: 0;
+          margin-top: 12px;
+          border-top: 1px solid #ffffff33;
+        }
+
+        .hero-mobile-partner > * {
+          position: relative !important;
+          inset: auto !important;
+          box-sizing: border-box;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 0 !important;
+          max-height: none !important;
+          overflow: visible !important;
         }
 
         .hero-partner-panel {
+          display: none;
+          box-sizing: border-box;
           height: 100%;
-          min-height: 0;
           min-width: 0;
+          min-height: 0;
           overflow: hidden;
           border-left: 1px solid #ffffff33;
+          padding-top: var(--navbar-clearance, 0px);
         }
 
         .hero-partner-panel > * {
           position: relative;
+          box-sizing: border-box;
           width: 100%;
           height: 100%;
           min-height: 0;
@@ -317,18 +424,29 @@ export default function Hero() {
           .hero-layout {
             grid-template-columns: minmax(0, 1fr) 320px;
           }
+
+          .hero-mobile-partner {
+            display: none;
+          }
+
+          .hero-partner-panel {
+            display: block;
+          }
         }
 
         @media (max-width: 767px) {
+          .hero-main {
+            padding-left: 12px;
+            padding-right: 12px;
+          }
+
           .hero-brand {
-            display: flex;
             flex-wrap: nowrap;
-            align-items: baseline;
             gap: clamp(0.35rem, 2vw, 0.75rem);
             font-size: clamp(1.3rem, 6.3vw, 2.8rem);
             line-height: 1.25;
-            white-space: nowrap;
             letter-spacing: -0.05em;
+            white-space: nowrap;
           }
 
           .hero-brand > * {
@@ -346,12 +464,11 @@ export default function Hero() {
           }
 
           .hero-content {
-            padding-bottom: 0;
             row-gap: 0;
           }
 
           .hero-image-slot {
-            margin-top: 16px;
+            margin-top: 8px;
             padding-top: 0;
             padding-bottom: 0;
           }
@@ -431,42 +548,51 @@ export default function Hero() {
 
       <section
         ref={mainRef}
-        className="hero-main relative isolate font-sans"
+        className="hero-main font-sans"
       >
         <WhiteBg />
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidde "
+          className="pointer-events-none absolute inset-0 overflow-hidden"
         >
           <div className="absolute left-1/3 top-0 h-32 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-[65px]" />
         </div>
 
-        <div className="hero-upper-slot">
+        <div
+          ref={upperSlotRef}
+          className="hero-upper-slot"
+        >
           <div
-            ref={contentRef}
+            ref={upperRef}
             className="hero-upper-content"
             style={{
-              transform: `scale(${fit.contentScale})`,
+              transform: `scale(${fit.scale})`,
             }}
           >
-            <header className="hero-enter relative shrink-0">
+            <header className="hero-enter relative">
               <div className="flex items-start gap-3">
                 <span
                   aria-hidden="true"
                   className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white shadow-[0_0_8px_white]"
                 />
-<p className="relative top-[5px] text-xs font-medium leading-6 text-zinc-300 sm:text-sm">
-  {t.label}
-</p>
+
+                <p className="text-xs font-medium leading-6 text-zinc-300 sm:text-sm">
+                  {t.label}
+                </p>
               </div>
 
               <h1 className="hero-brand mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono text-[clamp(2.3rem,7vw,6rem)] font-semibold leading-[1.05] tracking-tighter lg:text-[7rem]">
                 <GlitchText text="YHH" />
 
-                <span className="font-light text-zinc-400">×</span>
+                <span className="font-light text-zinc-400">
+                  ×
+                </span>
 
-                <GlitchText text={brand} delay="-1.1s" />
+                <GlitchText
+                  text={brand}
+                  delay="-1.1s"
+                />
               </h1>
 
               <div
@@ -481,8 +607,12 @@ export default function Hero() {
               </div>
             </header>
 
-            <div className="hero-content relative grid gap-2 pt-1 sm:gap-4 sm:pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
-              <HeroTexts t={t} locale={locale} brand={brand} />
+            <div className="hero-content relative grid items-start gap-2 pt-1 sm:gap-4 sm:pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
+              <HeroTexts
+                t={t}
+                locale={locale}
+                brand={brand}
+              />
 
               <div
                 className="hero-image-slot hero-enter mt-8 min-w-0 px-2 pb-0 pt-5 sm:px-3 md:mt-0 md:py-5"
@@ -490,6 +620,10 @@ export default function Hero() {
               >
                 <HeroImage />
               </div>
+            </div>
+
+            <div className="hero-mobile-partner">
+              <RP />
             </div>
           </div>
         </div>
@@ -510,7 +644,7 @@ export default function Hero() {
         </div>
       </section>
 
-      <div className="hero-partner-panel hidden xl:block">
+      <div className="hero-partner-panel">
         <RP />
       </div>
     </div>

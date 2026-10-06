@@ -177,7 +177,7 @@ export default function LoadingPage({ onFinish }) {
       {/* Quiet framing */}
       <header className="flex shrink-0 items-center justify-between px-5 py-6 sm:px-8">
         <span className="text-xs font-semibold tracking-tight text-zinc-400">
-          Sopxtech<span className="text-zinc-600">_</span>
+          portal:22<span className="text-zinc-600">_</span>
         </span>
 
         <span className="text-[9px] tracking-[0.2em] text-zinc-600">
@@ -237,7 +237,7 @@ export default function LoadingPage({ onFinish }) {
                 />
 
                 <span className="relative">
-                  {leaving ? "ENTERING" : "START"}
+                  {leaving ? "ENTERING" : "START:443"}
                 </span>
 
                 <span
