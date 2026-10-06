@@ -100,7 +100,7 @@ export default function HeroTexts({ t, locale, brand }) {
           className="group min-w-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
         >
           <p className="flex items-start justify-between gap-1 text-xs font-semibold leading-5 text-zinc-200 transition-colors group-hover:text-white sm:text-sm">
-            <span>Your Health Huddle</span>
+            <span>YHH / Your Health Huddle</span>
 
             <span
               aria-hidden="true"

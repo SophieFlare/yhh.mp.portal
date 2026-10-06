@@ -169,7 +169,7 @@ export default function Navbar() {
           }
           className="w-full px-4 sm:px-6 lg:px-8"
         >
-          <div className="flex h-20 w-full items-center justify-between gap-4">
+          <div className="flex h-20 w-full items-center justify-end gap-4 sm:justify-between">
             <Link
               to="/"
               aria-label={
@@ -177,7 +177,7 @@ export default function Navbar() {
                   ? "Sopxtech — მთავარი"
                   : "Sopxtech home"
               }
-              className="inline-flex rounded-sm py-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              className="hidden rounded-sm py-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:inline-flex"
             >
               <GlitchBrand />
             </Link>
@@ -201,7 +201,7 @@ export default function Navbar() {
                 className="sop-menu-shine pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent"
               />
 
-              <span className="relative text-[10px] font-semibold tracking-[0.18em]">
+              <span className="relative hidden text-[10px] font-semibold tracking-[0.18em] sm:inline">
                 {isGeorgian ? "მენიუ" : "MENU"}
               </span>
 

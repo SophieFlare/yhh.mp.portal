@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useLanguage } from "../../context/LanguageContext";
 
 import WhiteBg from "../atoms/WhiteBg";
@@ -17,7 +17,7 @@ const content = {
     challenge: "მიიღე გამოწვევა.",
     headline: "შექმენი შენი გზა...",
     description:
-      "მონაწილეობა მიიღე MP Technology-ის შექმნაში — ESP32 პროგრამირებით, ელექტრონიკით ან პროტოტიპის დამზადებით. გაეცანი ეტაპებს და გვაჩვენე შენი შესაძლებლობები.",
+      "მიიღე მონაწილეობა MP ტექნოლოგიის შექმნაში — ESP32 პროგრამირებით, ელექტრონიკით ან პროტოტიპის დამზადებით. გაეცანი ეტაპებს და გვაჩვენე შენი შესაძლებლობები.",
     awareness: "ტექნოლოგია ცნობიერების ასამაღლებლად.",
     coordination: "პროექტის კოორდინაცია · რეკრუტინგი · ვებდეველოპმენტი",
     sopo: "სოფო",
@@ -46,58 +46,151 @@ export default function Hero() {
   const { language } = useLanguage();
   const locale = language === "en" ? "en" : "ka";
   const t = content[locale];
-  const heroRef = useRef(null);
 
-  // Let the page grow and scroll at every screen size.
-  // Restore the surrounding layout when this page unmounts.
-  useEffect(() => {
+  const heroRef = useRef(null);
+  const mainRef = useRef(null);
+  const contentRef = useRef(null);
+  const footerRef = useRef(null);
+
+  const [fit, setFit] = useState({
+    contentScale: 1,
+    footerScale: 1,
+    footerHeight: 0,
+  });
+
+  useLayoutEffect(() => {
     const hero = heroRef.current;
-    if (!hero) return;
+    const main = mainRef.current;
+    const upper = contentRef.current;
+    const footer = footerRef.current;
+
+    if (!hero || !main || !upper || !footer) return;
 
     const snapshots = [];
 
-    for (let node = hero; node; node = node.parentElement) {
-      const properties = {
-        height: "auto",
-        "max-height": "none",
-        "overflow-y": "visible",
-        "overflow-x": "clip",
-        "touch-action": "pan-y pinch-zoom",
-        "overscroll-behavior-y": "auto",
-      };
+    function override(node, property, value) {
+      snapshots.push({
+        node,
+        property,
+        value: node.style.getPropertyValue(property),
+        priority: node.style.getPropertyPriority(property),
+      });
+
+      node.style.setProperty(property, value, "important");
+    }
+
+    for (let node = hero.parentElement; node; node = node.parentElement) {
+      override(node, "min-height", "0");
+      override(node, "overflow-y", "hidden");
 
       if (
-        node === document.documentElement ||
-        node === document.body
+        node === document.body ||
+        node === document.documentElement
       ) {
-        properties["overflow-y"] = "auto";
-      }
-
-      const position = window.getComputedStyle(node).position;
-
-      if (position === "fixed" || position === "absolute") {
-        properties.position = "relative";
-        properties.inset = "auto";
-      }
-
-      for (const [property, value] of Object.entries(properties)) {
-        snapshots.push([
-          node,
-          property,
-          node.style.getPropertyValue(property),
-          node.style.getPropertyPriority(property),
-        ]);
-
-        node.style.setProperty(property, value, "important");
+        override(node, "height", "100%");
       }
     }
 
+    let frame = 0;
+    let disposed = false;
+
+    function measure() {
+      if (disposed) return;
+
+      const viewport = window.visualViewport;
+      const viewportBottom = viewport
+        ? viewport.offsetTop + viewport.height
+        : window.innerHeight;
+
+      const top = hero.getBoundingClientRect().top;
+      const availableHeight = Math.max(0, viewportBottom - top);
+
+      hero.style.setProperty(
+        "--hero-available-height",
+        `${availableHeight}px`
+      );
+
+      const styles = window.getComputedStyle(main);
+      const padding =
+        parseFloat(styles.paddingTop) +
+        parseFloat(styles.paddingBottom);
+
+      const innerHeight = Math.max(0, main.clientHeight - padding);
+      const footerNaturalHeight = footer.offsetHeight;
+
+      const footerScale = Math.min(
+        1,
+        (innerHeight * 0.4) / Math.max(1, footerNaturalHeight)
+      );
+
+      const footerHeight = footerNaturalHeight * footerScale;
+      const contentHeight = Math.max(0, innerHeight - footerHeight);
+
+      const contentScale = Math.min(
+        1,
+        contentHeight / Math.max(1, upper.offsetHeight)
+      );
+
+      setFit((previous) => {
+        if (
+          Math.abs(previous.contentScale - contentScale) < 0.001 &&
+          Math.abs(previous.footerScale - footerScale) < 0.001 &&
+          Math.abs(previous.footerHeight - footerHeight) < 0.5
+        ) {
+          return previous;
+        }
+
+        return {
+          contentScale,
+          footerScale,
+          footerHeight,
+        };
+      });
+    }
+
+    function scheduleMeasure() {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    }
+
+    const observer = new ResizeObserver(scheduleMeasure);
+
+    observer.observe(main);
+    observer.observe(upper);
+    observer.observe(footer);
+
+    window.addEventListener("resize", scheduleMeasure);
+    window.visualViewport?.addEventListener("resize", scheduleMeasure);
+    window.visualViewport?.addEventListener("scroll", scheduleMeasure);
+
+    document.fonts?.ready.then(scheduleMeasure);
+
+    measure();
+
     return () => {
-      for (const [node, property, value, priority] of snapshots.reverse()) {
-        if (value) {
-          node.style.setProperty(property, value, priority);
+      disposed = true;
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+
+      window.removeEventListener("resize", scheduleMeasure);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        scheduleMeasure
+      );
+      window.visualViewport?.removeEventListener(
+        "scroll",
+        scheduleMeasure
+      );
+
+      for (const snapshot of snapshots.reverse()) {
+        if (snapshot.value) {
+          snapshot.node.style.setProperty(
+            snapshot.property,
+            snapshot.value,
+            snapshot.priority
+          );
         } else {
-          node.style.removeProperty(property);
+          snapshot.node.style.removeProperty(snapshot.property);
         }
       }
     };
@@ -108,50 +201,121 @@ export default function Hero() {
       ref={heroRef}
       data-lenis-prevent
       lang={locale}
-      className="hero-layout relative isolate grid min-w-0 bg-black text-white xl:grid-cols-[minmax(0,1fr)_320px]"
+      className="hero-layout relative isolate grid min-w-0 bg-black text-white"
     >
       <style>{`
         .hero-layout {
-          --hero-navbar-height: 64px;
           width: 100%;
-          min-height: calc(100vh - var(--hero-navbar-height));
-          min-height: calc(100dvh - var(--hero-navbar-height));
+          height: var(--hero-available-height, calc(100dvh - 80px));
+          min-height: 0;
+          max-height: var(--hero-available-height, calc(100dvh - 80px));
+          overflow: hidden;
           align-items: stretch;
+          grid-template-columns: minmax(0, 1fr);
         }
 
         .hero-main {
-          min-height: calc(100vh - var(--hero-navbar-height));
-          min-height: calc(100dvh - var(--hero-navbar-height));
-          height: auto;
-          overflow: visible;
+          height: 100%;
+          min-height: 0;
+          min-width: 0;
+          overflow: hidden;
+          display: grid;
+          grid-template-rows: minmax(0, 1fr) auto;
+          gap: 0;
+          padding: clamp(8px, 2dvh, 24px) 16px;
+          padding-bottom: max(
+            12px,
+            env(safe-area-inset-bottom, 0px)
+          );
+          padding-top: calc(
+  var(--hero-navbar-clearance, 0px) +
+  clamp(16px, 3dvh, 32px) +
+  3dvh
+);
+        }
+
+        .hero-upper-slot {
+          position: relative;
+          min-height: 0;
+          min-width: 0;
+          overflow: hidden;
+        }
+
+        .hero-upper-content {
+          display: flow-root;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          transform-origin: bottom center;
         }
 
         .hero-content {
-          flex: 0 0 auto;
+          min-width: 0;
           align-items: start;
+          padding-bottom: 0;
         }
 
-        .hero-footer {
-          margin-top: auto;
-          flex-shrink: 0;
+        .hero-footer-slot {
+          position: relative;
+          min-width: 0;
+          align-self: end;
+        }
+
+        .hero-footer-fit {
+          display: flow-root;
+          width: 100%;
+          transform-origin: top center;
+        }
+
+        .hero-footer-fit .hero-footer {
+          position: relative !important;
+          inset: auto !important;
+          margin-top: 0 !important;
+          padding-top: 0 !important;
+          background: transparent;
+          box-shadow: none;
+          backdrop-filter: none;
+        }
+
+        .hero-image-slot {
+          min-width: 0;
         }
 
         .hero-partner-panel {
+          height: 100%;
+          min-height: 0;
           min-width: 0;
+          overflow: hidden;
+          border-left: 1px solid #ffffff33;
         }
 
         .hero-partner-panel > * {
           position: relative;
           width: 100%;
-          height: auto;
-          min-height: 100%;
-          max-height: none;
-          overflow: visible;
+          height: 100%;
+          min-height: 0;
+          max-height: 100%;
+          overflow: hidden;
         }
 
-        @media (max-width: 1279px) {
-          .hero-partner-panel {
-            border-top: 1px solid #ffffff33;
+        @media (min-width: 640px) {
+          .hero-main {
+            padding-left: 32px;
+            padding-right: 32px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .hero-main {
+            padding-left: 40px;
+            padding-right: 40px;
+          }
+        }
+
+        @media (min-width: 1280px) {
+          .hero-layout {
+            grid-template-columns: minmax(0, 1fr) 320px;
           }
         }
 
@@ -181,10 +345,15 @@ export default function Hero() {
             overflow-wrap: anywhere;
           }
 
-          .hero-main {
-            padding-bottom: calc(
-              2rem + env(safe-area-inset-bottom, 0px)
-            );
+          .hero-content {
+            padding-bottom: 0;
+            row-gap: 0;
+          }
+
+          .hero-image-slot {
+            margin-top: 16px;
+            padding-top: 0;
+            padding-bottom: 0;
           }
 
           .hero-action {
@@ -205,17 +374,9 @@ export default function Hero() {
         }
 
         @keyframes hero-scan {
-          0% {
-            top: 0;
-            opacity: 0;
-          }
-          15%, 80% {
-            opacity: 0.55;
-          }
-          100% {
-            top: 100%;
-            opacity: 0;
-          }
+          0% { top: 0; opacity: 0; }
+          15%, 80% { opacity: 0.55; }
+          100% { top: 100%; opacity: 0; }
         }
 
         @keyframes hero-enter {
@@ -268,63 +429,88 @@ export default function Hero() {
         }
       `}</style>
 
-      <section className="hero-main relative isolate flex min-w-0 flex-col px-4 pb-8 pt-8 font-sans sm:px-8 sm:pt-12 lg:px-10">
+      <section
+        ref={mainRef}
+        className="hero-main relative isolate font-sans"
+      >
         <WhiteBg />
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidden"
+          className="pointer-events-none absolute inset-0 overflow-hidde "
         >
           <div className="absolute left-1/3 top-0 h-32 w-64 -translate-y-1/2 rounded-full bg-white/10 blur-[65px]" />
         </div>
 
-        <header className="hero-enter relative mt-4 shrink-0">
-          <div className="flex items-start gap-3">
-            <span
-              aria-hidden="true"
-              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white shadow-[0_0_8px_white]"
-            />
-
-            <p className="text-xs font-medium leading-6 text-zinc-300 sm:text-sm">
-              {t.label}
-            </p>
-          </div>
-
-          <h1 className="hero-brand mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono text-[clamp(2.3rem,7vw,6rem)] font-semibold leading-[1.05] tracking-tighter lg:text-[7rem]">
-            <GlitchText text="YHH" />
-
-            <span className="font-light text-zinc-400">×</span>
-
-            <GlitchText text={brand} delay="-1.1s" />
-          </h1>
-
+        <div className="hero-upper-slot">
           <div
-            aria-hidden="true"
-            className="mt-2 flex items-center gap-3"
+            ref={contentRef}
+            className="hero-upper-content"
+            style={{
+              transform: `scale(${fit.contentScale})`,
+            }}
           >
-            <span className="h-px w-12 shrink-0 bg-white/60" />
+            <header className="hero-enter relative shrink-0">
+              <div className="flex items-start gap-3">
+                <span
+                  aria-hidden="true"
+                  className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white shadow-[0_0_8px_white]"
+                />
+<p className="relative top-[5px] text-xs font-medium leading-6 text-zinc-300 sm:text-sm">
+  {t.label}
+</p>
+              </div>
 
-            <span className="font-mono text-[10px] leading-5 tracking-[0.12em] text-zinc-400 sm:text-xs">
-              PEOPLE / IDEAS / TECHNOLOGY
-            </span>
-          </div>
-        </header>
+              <h1 className="hero-brand mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono text-[clamp(2.3rem,7vw,6rem)] font-semibold leading-[1.05] tracking-tighter lg:text-[7rem]">
+                <GlitchText text="YHH" />
 
-        <div className="hero-content relative grid items-start gap-2 pb-2 pt-1 sm:gap-4 sm:pb-4 sm:pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
-          <HeroTexts t={t} locale={locale} brand={brand} />
+                <span className="font-light text-zinc-400">×</span>
 
-          <div
-            className="hero-enter min-w-0 px-2 py-5 sm:px-3"
-            style={{ animationDelay: "200ms" }}
-          >
-            <HeroImage />
+                <GlitchText text={brand} delay="-1.1s" />
+              </h1>
+
+              <div
+                aria-hidden="true"
+                className="mt-2 flex items-center gap-3"
+              >
+                <span className="h-px w-12 shrink-0 bg-white/60" />
+
+                <span className="font-mono text-[10px] leading-5 tracking-[0.12em] text-zinc-400 sm:text-xs">
+                  PEOPLE / IDEAS / TECHNOLOGY
+                </span>
+              </div>
+            </header>
+
+            <div className="hero-content relative grid gap-2 pt-1 sm:gap-4 sm:pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
+              <HeroTexts t={t} locale={locale} brand={brand} />
+
+              <div
+                className="hero-image-slot hero-enter mt-8 min-w-0 px-2 pb-0 pt-5 sm:px-3 md:mt-0 md:py-5"
+                style={{ animationDelay: "200ms" }}
+              >
+                <HeroImage />
+              </div>
+            </div>
           </div>
         </div>
 
-        <HeroFooter t={t} />
+        <div
+          className="hero-footer-slot"
+          style={{ height: fit.footerHeight }}
+        >
+          <div
+            ref={footerRef}
+            className="hero-footer-fit"
+            style={{
+              transform: `scale(${fit.footerScale})`,
+            }}
+          >
+            <HeroFooter t={t} />
+          </div>
+        </div>
       </section>
 
-      <div className="hero-partner-panel hidden md:block">
+      <div className="hero-partner-panel hidden xl:block">
         <RP />
       </div>
     </div>
