@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const TITLE = "Hello World...";
-const CREDIT = "Made by Sopxtech";
+const CREDIT = "Made by $opXtech";
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$_<>/";
 
 function scramble(text, amount) {

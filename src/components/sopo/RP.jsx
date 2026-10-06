@@ -75,11 +75,18 @@ const content = {
 
 function MessageBox({ t, locale }) {
   const [index, setIndex] = useState(0);
-  const [display, setDisplay] = useState("");
+  const [typed, setTyped] = useState({
+    source: "",
+    value: "",
+  });
+
   const section = t.sections[index];
+  const display = typed.source === section.text ? typed.value : "";
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const media = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
     const characters = Array.from(section.text);
     let timer;
 
@@ -87,17 +94,31 @@ function MessageBox({ t, locale }) {
       clearInterval(timer);
 
       if (media.matches) {
-        setDisplay(section.text);
+        setTyped({
+          source: section.text,
+          value: section.text,
+        });
         return;
       }
 
-      setDisplay("");
+      setTyped({
+        source: section.text,
+        value: "",
+      });
+
       let position = 0;
 
       timer = setInterval(() => {
         position += 1;
-        setDisplay(characters.slice(0, position).join(""));
-        if (position >= characters.length) clearInterval(timer);
+
+        setTyped({
+          source: section.text,
+          value: characters.slice(0, position).join(""),
+        });
+
+        if (position >= characters.length) {
+          clearInterval(timer);
+        }
       }, 24);
     }
 
@@ -111,7 +132,7 @@ function MessageBox({ t, locale }) {
   }, [section.text, locale]);
 
   return (
-    <section className="relative flex min-h-[260px] flex-col overflow-hidden rounded-xl border border-white/15 bg-white/[0.035] p-4 shadow-[inset_0_1px_0_#ffffff10] backdrop-blur-xl">
+    <section className="relative min-w-0 self-start overflow-hidden rounded-xl border border-white/15 bg-white/[0.035] p-4 shadow-[inset_0_1px_0_#ffffff10] backdrop-blur-xl">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent"
@@ -121,6 +142,7 @@ function MessageBox({ t, locale }) {
         <p className="font-mono text-[8px] tracking-widest text-zinc-500">
           SYSTEM // {section.code}
         </p>
+
         <div aria-hidden="true" className="flex gap-1">
           <span className="h-1 w-1 rounded-full bg-white" />
           <span className="h-1 w-1 rounded-full bg-white/40" />
@@ -128,13 +150,27 @@ function MessageBox({ t, locale }) {
         </div>
       </div>
 
-      <h2 className="mt-4 text-xs font-semibold leading-5">
+      <h2 className="mt-4 text-sm font-semibold leading-6">
         {section.title}
       </h2>
 
-      <div className="mt-2 flex-1 text-xs leading-6 text-zinc-400">
+      {/* Reserve only the current message's height while typing. */}
+      <div className="relative mt-2 text-xs leading-6 text-zinc-400">
         <span className="sr-only">{section.text}</span>
-        <div aria-hidden="true" className="whitespace-pre-line">
+
+        <div
+          aria-hidden="true"
+          className="invisible whitespace-pre-wrap break-words"
+        >
+          <span className="mr-1 font-mono">{">"}</span>
+          {section.text}
+          <span>▍</span>
+        </div>
+
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 whitespace-pre-wrap break-words"
+        >
           <span className="mr-1 font-mono text-white">{">"}</span>
           {display}
           <span className="animate-pulse text-white motion-reduce:animate-none">
@@ -143,12 +179,12 @@ function MessageBox({ t, locale }) {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-2">
+      <div className="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-2">
         <button
           type="button"
           disabled={index === 0}
           onClick={() => setIndex((value) => Math.max(0, value - 1))}
-          className="min-h-9 rounded px-2 text-[9px] text-zinc-300 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white disabled:cursor-default disabled:opacity-25"
+          className="min-h-10 rounded px-2 text-[10px] text-zinc-300 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white disabled:cursor-default disabled:opacity-25"
         >
           ‹ {t.previous}
         </button>
@@ -158,11 +194,14 @@ function MessageBox({ t, locale }) {
             <span
               key={item.code}
               className={`h-1 rounded-full transition-all ${
-                position === index ? "w-5 bg-white" : "w-1 bg-zinc-700"
+                position === index
+                  ? "w-5 bg-white"
+                  : "w-1 bg-zinc-700"
               }`}
             />
           ))}
         </div>
+
         <span className="sr-only">
           {index + 1} / {t.sections.length}
         </span>
@@ -171,9 +210,11 @@ function MessageBox({ t, locale }) {
           type="button"
           disabled={index === t.sections.length - 1}
           onClick={() =>
-            setIndex((value) => Math.min(t.sections.length - 1, value + 1))
+            setIndex((value) =>
+              Math.min(t.sections.length - 1, value + 1)
+            )
           }
-          className="min-h-9 rounded px-2 text-[9px] text-zinc-300 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white disabled:cursor-default disabled:opacity-25"
+          className="min-h-10 rounded px-2 text-[10px] text-zinc-300 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white disabled:cursor-default disabled:opacity-25"
         >
           {t.next} ›
         </button>
@@ -191,7 +232,7 @@ export default function RP() {
     <aside
       lang={locale}
       aria-label={t.profile}
-      className="relative isolate flex min-h-0 min-w-0 flex-col overflow-hidden border-t border-white/15 bg-[#050505] text-white xl:border-l xl:border-t-0"
+      className="relative isolate flex min-w-0 flex-col border-t border-white/15 bg-[#050505] text-white xl:border-l xl:border-t-0"
     >
       <style>{`
         @keyframes rp-breathe {
@@ -213,20 +254,33 @@ export default function RP() {
           to { transform: rotate(360deg); }
         }
 
-        .rp-breathe { animation: rp-breathe 8s ease-in-out infinite; }
+        .rp-breathe {
+          animation: rp-breathe 8s ease-in-out infinite;
+        }
+
         .rp-border-travel {
           animation: rp-border-travel 12s linear infinite;
         }
+
         .rp-binary {
           animation: rp-binary-travel 32s linear infinite;
         }
-        .rp-ring { animation: rp-ring-turn 40s linear infinite; }
+
+        .rp-ring {
+          animation: rp-ring-turn 40s linear infinite;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-          .rp-breathe, .rp-border-travel, .rp-binary, .rp-ring {
+          .rp-breathe,
+          .rp-border-travel,
+          .rp-binary,
+          .rp-ring {
             animation: none;
           }
-          .rp-border-travel { display: none; }
+
+          .rp-border-travel {
+            display: none;
+          }
         }
       `}</style>
 
@@ -240,7 +294,6 @@ export default function RP() {
         }}
       />
 
-      {/* Vertical light connecting the panel to Hero */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 left-0 w-px overflow-hidden"
@@ -250,39 +303,44 @@ export default function RP() {
 
       <div
         aria-hidden="true"
-        className="rp-breathe pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/10 blur-[80px]"
-      />
-
-      <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-4">
-        <p className="font-mono text-[8px] tracking-[0.2em] text-zinc-500">
-          HUMAN / BEHIND THE PROJECT
-        </p>
-        <span aria-hidden="true" className="text-zinc-600">✳</span>
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        <div className="rp-breathe absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-white/10 blur-[80px]" />
       </div>
 
-      <div className="relative grid flex-1 gap-4 p-4 md:grid-cols-2 xl:flex xl:min-h-0 xl:flex-col">
+      <header className="relative flex shrink-0 items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+        <p className="font-mono text-[8px] leading-5 tracking-[0.2em] text-zinc-500">
+          HUMAN / BEHIND THE PROJECT
+        </p>
+
+        <span aria-hidden="true" className="text-zinc-600">
+          ✳
+        </span>
+      </header>
+
+      {/* Cards keep their own heights instead of stretching. */}
+      <div className="relative grid items-start gap-4 p-4 md:grid-cols-2 xl:grid-cols-1">
         <MessageBox t={t} locale={locale} />
 
-        {/* Profile */}
-        <section className="relative flex min-h-[300px] min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-white/20 bg-white/[0.025] p-3 backdrop-blur-lg">
+        <section className="relative min-w-0 self-start overflow-hidden rounded-xl border border-white/20 bg-white/[0.025] p-3 backdrop-blur-lg">
           <div className="flex items-center justify-between gap-2 pb-3">
             <h2 className="font-mono text-[9px] font-semibold tracking-wide">
               SOPO / TECHIE GIRL
             </h2>
+
             <span
               aria-hidden="true"
-              className="h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_10px_white]"
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-white shadow-[0_0_10px_white]"
             />
           </div>
 
-          {/* White portrait studio */}
-          <div className="relative isolate min-h-[220px] flex-1 overflow-hidden rounded-lg border border-white/20 bg-zinc-100">
+          {/* Fixed portrait height, independent of the text card. */}
+          <div className="relative isolate h-[420px] w-full overflow-hidden rounded-lg border border-white/20 bg-zinc-100">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,white_15%,#e4e4e7_75%,#a1a1aa_100%)]"
             />
 
-            {/* Geometric frame behind the transparent PNG */}
             <div
               aria-hidden="true"
               className="rp-ring pointer-events-none absolute left-[10%] top-[12%] aspect-square w-[80%] rounded-full border border-black/10"
@@ -300,7 +358,6 @@ export default function RP() {
               }}
             />
 
-            {/* Subtle binary behind the portrait */}
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -313,25 +370,28 @@ export default function RP() {
               </p>
             </div>
 
+            {/* Enlarge Sopo while keeping her anchored at the bottom. */}
             <img
               src="/img/pixel_sopo.png"
               alt={t.name}
-              className="absolute inset-0 z-10 h-full w-full object-contain object-bottom grayscale"
+              className="absolute inset-0 z-10 h-full w-full origin-bottom scale-[1.2] object-contain object-bottom grayscale"
             />
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-black/90 via-transparent to-transparent"
+              className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-black/95 via-black/0 to-transparent"
             />
 
             <div className="absolute inset-x-4 bottom-4 z-30">
-              <p className="font-mono text-[7px] tracking-[0.2em] text-white/50">
+              <p className="font-mono text-[8px] tracking-[0.2em] text-white/60">
                 SC4TECH / PROFILE_01
               </p>
-              <p className="mt-1 text-xl font-semibold tracking-tight">
+
+              <p className="mt-1 text-3xl font-semibold tracking-tight">
                 {t.name}
               </p>
-              <p className="mt-1 max-w-56 text-[9px] leading-5 text-zinc-300">
+
+              <p className="mt-2 max-w-64 text-[10px] leading-5 text-zinc-200">
                 {t.role}
               </p>
             </div>
@@ -339,17 +399,21 @@ export default function RP() {
 
           <Link
             to="/levels/2"
-            className="group mt-3 flex min-h-10 items-center justify-between gap-3 rounded-md border border-white/10 bg-white/[0.025] px-3 text-[10px] text-zinc-300 transition-colors hover:border-white/30 hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+            className="group mt-3 flex min-h-11 items-center justify-between gap-3 rounded-md border border-white/10 bg-white/[0.025] px-3 py-2 text-xs text-zinc-300 transition-colors hover:border-white/30 hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-white"
           >
             <span>{t.task}</span>
-            <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
+
+            <span
+              aria-hidden="true"
+              className="shrink-0 transition-transform group-hover:translate-x-1"
+            >
               →
             </span>
           </Link>
         </section>
       </div>
 
-      <footer className="relative flex items-center justify-between border-t border-white/10 px-5 py-3 font-mono text-[7px] tracking-wider text-zinc-600">
+      <footer className="relative mt-auto flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-3 font-mono text-[8px] tracking-wider text-zinc-500">
         <span>YHH × SC4TECH</span>
         <span aria-hidden="true">01010011 / 01</span>
       </footer>

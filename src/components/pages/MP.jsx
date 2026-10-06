@@ -315,10 +315,10 @@ export default function MP() {
   const t = content[locale];
 
   return (
-    <section
-      lang={locale}
-      className="relative isolate flex h-full min-h-0 w-full items-center overflow-y-auto overflow-x-hidden px-4 py-5 font-sans text-white sm:px-8 lg:px-10"
-    >
+ <section
+  lang={locale}
+  className="relative isolate flex min-h-dvh w-full items-center overflow-x-clip px-4 py-8 font-sans text-white sm:px-8 sm:py-10 lg:px-10"
+>
       <WhiteBg />
 
       <style>{`
