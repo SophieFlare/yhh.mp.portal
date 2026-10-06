@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import GlitchText from "../atoms/GlitchText";
 
 export default function HeroFooter({ t }) {
   return (
@@ -29,11 +30,16 @@ export default function HeroFooter({ t }) {
             {">_"}
           </span>
 
-          <span className="min-w-0">{t.terminal}</span>
+          <GlitchText
+            text={t.terminal}
+            duration="4.8s"
+            delay="-1.2s"
+            className="min-w-0"
+          />
 
           <span
             aria-hidden="true"
-            className="shrink-0 transition-transform group-hover:translate-x-1"
+            className="shrink-0 transition-transform group-hover:translate-x-1 motion-reduce:transform-none"
           >
             →
           </span>

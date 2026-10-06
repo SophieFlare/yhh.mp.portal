@@ -84,14 +84,18 @@ export default function HeroTexts({ t, locale, brand }) {
       </p>
 
 <div className="mt-5 flex w-full flex-nowrap gap-2 sm:flex-wrap">
-  {["ESP32", "ELECTRONICS", "PROTOTYPING"].map((item) => (
-    <span
-      key={item}
-      className="min-w-0 flex-1 whitespace-nowrap rounded-md border border-white/20 bg-white/[0.05] px-1 py-2 text-center font-mono text-[clamp(9px,2.8vw,12px)] text-zinc-300 sm:flex-none sm:px-3 sm:text-xs"
-    >
-      {item}
-    </span>
-  ))}
+  {["ESP32", "ELECTRONICS", "PROTOTYPING", "C++", "FIRMWARE"].map(
+    (item, index) => (
+      <span
+        key={item}
+        className={`${
+          index >= 3 ? "hidden lg:inline-block" : ""
+        } min-w-0 flex-1 whitespace-nowrap rounded-md border border-white/20 bg-white/[0.05] px-1 py-2 text-center font-mono text-[clamp(9px,2.8vw,12px)] text-zinc-300 sm:flex-none sm:px-3 sm:text-xs`}
+      >
+        {item}
+      </span>
+    )
+  )}
 </div>
 
     <HeroInfo t={t} locale={locale} brand={brand} />

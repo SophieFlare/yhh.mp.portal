@@ -104,7 +104,7 @@ export default function Navbar() {
   const previousPath = useRef(pathname);
 
   const isGeorgian = language !== "en";
-
+const isHome = pathname === "/";
   useEffect(() => {
     if (previousPath.current !== pathname) {
       setOpen(false);
@@ -169,18 +169,22 @@ export default function Navbar() {
           }
           className="w-full px-4 sm:px-6 lg:px-8"
         >
-          <div className="flex h-20 w-full items-center justify-end gap-4 sm:justify-between">
-            <Link
-              to="/"
-              aria-label={
-                isGeorgian
-                  ? "Sopxtech — მთავარი"
-                  : "Sopxtech home"
-              }
-              className="hidden rounded-sm py-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:inline-flex"
-            >
-              <GlitchBrand />
-            </Link>
+       <div
+  className={`flex h-20 w-full items-center gap-4 ${
+    isHome ? "justify-end" : "justify-end sm:justify-between"
+  }`}
+>
+          {!isHome && (
+  <Link
+    to="/"
+    aria-label={
+      isGeorgian ? "Sopxtech — მთავარი" : "Sopxtech home"
+    }
+    className="hidden rounded-sm py-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:inline-flex"
+  >
+    <GlitchBrand />
+  </Link>
+)}
 
             <button
               ref={menuButton}

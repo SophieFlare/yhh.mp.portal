@@ -12,9 +12,9 @@ const content = {
     sections: [
       {
         code: "ABOUT",
-        title: "გავიცნოთ ერთმანეთი",
+      title: "კავშირის ინიციალიზაცია",
         text:
-          "სალამი ★ მე ვარ სოფო\nპროექტის კოორდინატორი / რეკრუტერი\nდა ვებდეველოპერი.",
+         "სალამი ★ მე ვარ სოფო.\nმზად ხარ ახალი პროექტისთვის?\nამ პორტალზე გაეცნობი თანამშრომლობის პირობებსა და შერჩევის ეტაპებს.",
       },
       {
         code: "NEXT_STEP",
@@ -46,9 +46,9 @@ const content = {
     sections: [
       {
         code: "ABOUT",
-        title: "Let’s meet",
+       title: "Initializing connection",
         text:
-          "Hi ★ I’m Sopo.\nProject coordinator / recruiter\nand web developer.",
+           "Hi ★ I’m Sopo.\nReady for a new project?\nExplore the collaboration terms and selection stages through this portal.",
       },
       {
         code: "NEXT_STEP",
@@ -287,7 +287,7 @@ export default function RP() {
           HUMAN / BEHIND THE PROJECT
         </p>
         <span aria-hidden="true" className="text-zinc-600">
-          ✳
+          ★
         </span>
       </header>
       {/* Cards keep their own heights instead of stretching. */}
@@ -336,11 +336,11 @@ export default function RP() {
               </p>
             </div>
             {/* Enlarge Sopo while keeping her anchored at the bottom. */}
-            <img
-              src="/img/pixel_sopo.png"
-              alt={t.name}
-              className="absolute inset-0 z-10 h-full w-full origin-bottom scale-[1.2] object-contain object-bottom grayscale"
-            />
+       <img
+  src="/img/pixel_sopo.png"
+  alt={t.name}
+  className="absolute inset-0 z-10 h-full w-full origin-bottom scale-[1.5] object-contain object-bottom grayscale"
+/>
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-black/95 via-black/0 to-transparent"
